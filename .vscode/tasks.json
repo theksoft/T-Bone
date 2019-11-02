@@ -1,0 +1,58 @@
+{
+    // See https://go.microsoft.com/fwlink/?LinkId=733558
+    // for the documentation about the tasks.json format
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "echo",
+            "type": "shell",
+            "command": "echo Hello"
+        },
+        {
+            "type": "shell",
+            "label": "build active file",
+            "command": "make",
+            "args": [
+                "obj/${fileBasenameNoExtension}.o"
+            ],
+            "options": {
+                "cwd": "${workspaceRoot}"
+            },
+            "problemMatcher": {
+                "base": "$gcc",
+                "fileLocation": [
+                    "relative",
+                    "${workspaceFolder}"
+                ]
+            },
+            "group": "build"
+        },
+        {
+            "type": "shell",
+            "label": "build all",
+            "command": "make",
+            "args": [
+                "all"
+            ],
+            "options": {
+                "cwd": "${workspaceRoot}"
+            },
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            }
+        },
+        {
+            "type": "shell",
+            "label": "rebuild all",
+            "command": "make",
+            "args": [
+                "clean", "all"
+            ],
+            "options": {
+                "cwd": "${workspaceRoot}"
+            },
+            "group": "build"
+        }
+    ]
+}
