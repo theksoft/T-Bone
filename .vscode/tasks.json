@@ -10,10 +10,10 @@
         },
         {
             "type": "shell",
-            "label": "build active file",
+            "label": "build active file (win)",
             "command": "make",
             "args": [
-                "obj/${fileBasenameNoExtension}.o"
+                "obj/win/${fileBasenameNoExtension}.o", "PLATFORM=win"
             ],
             "options": {
                 "cwd": "${workspaceRoot}"
@@ -29,7 +29,41 @@
         },
         {
             "type": "shell",
-            "label": "build all",
+            "label": "build active file (linux)",
+            "command": "make",
+            "args": [
+                "obj/linux/${fileBasenameNoExtension}.o"
+            ],
+            "options": {
+                "cwd": "${workspaceRoot}"
+            },
+            "problemMatcher": {
+                "base": "$gcc",
+                "fileLocation": [
+                    "relative",
+                    "${workspaceFolder}"
+                ]
+            },
+            "group": "build"
+        },
+        {
+            "type": "shell",
+            "label": "build all (win)",
+            "command": "make",
+            "args": [
+                "all", "PLATFORM=win"
+            ],
+            "options": {
+                "cwd": "${workspaceRoot}"
+            },
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            }
+        },
+        {
+            "type": "shell",
+            "label": "build all (linux)",
             "command": "make",
             "args": [
                 "all"
@@ -44,7 +78,19 @@
         },
         {
             "type": "shell",
-            "label": "rebuild all",
+            "label": "rebuild all (win)",
+            "command": "make",
+            "args": [
+                "clean", "all", "PLATFORM=win"
+            ],
+            "options": {
+                "cwd": "${workspaceRoot}"
+            },
+            "group": "build"
+        },
+        {
+            "type": "shell",
+            "label": "rebuild all (linux)",
             "command": "make",
             "args": [
                 "clean", "all"
