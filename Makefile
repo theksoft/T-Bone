@@ -32,9 +32,9 @@ vpath %.h $(INCD):$(SRCD)
 vpath %.hpp $(INCD):$(SRCD)
 vpath %.cpp $(SRCD)
 vpath %.c $(SRCD)
-vpath %.o $(OBJD)
-vpath %.a $(LIBD)
-vpath %$(EXE) $(BIND)
+vpath %.o $(OBJD)/$(PLATFORM)
+vpath %.a $(LIBD)/$(PLATFORM)
+vpath %$(EXE) $(BIND)/$(PLATFORM)
 
 # Project source file list
 
@@ -62,45 +62,45 @@ all: dirs $(LIBAPP).a $(LIBTEE).a $(SRVTEE)$(EXE)
 
 # Project file dependencies
 
-$(OBJD)/ts-main.o: ts-main.cpp
-$(OBJD)/tc-mem.o: tc-mem.c
-$(OBJD)/ac-entry.o: ac-entry.cpp
+$(OBJD)/$(PLATFORM)/ts-main.o: ts-main.cpp
+$(OBJD)/$(PLATFORM)/tc-mem.o: tc-mem.c
+$(OBJD)/$(PLATFORM)/ac-entry.o: ac-entry.cpp
 
 # Project files build rules
 
-$(OBJD)/%.o: %.cpp
+$(OBJD)/$(PLATFORM)/%.o: %.cpp
 	$(CXX) $(CXXFLAGS) $(CXXINCLUDES:%=-I %) -c $< -o $@
 
-$(OBJD)/%.o: %.c
+$(OBJD)/$(PLATFORM)/%.o: %.c
 	$(CC) $(CFLAGS) $(CINCLUDES:%=-I %) -c $< -o $@
 
 # Project targets build
 
-$(LIBD)/$(LIBAPP).a: $(OBJSC)
+$(LIBD)/$(PLATFORM)/$(LIBAPP).a: $(OBJSC)
 	@echo ==== Building $@ [application library] ====
 	$(AR) $(ARFLAGS) $@ $^
 	@echo =**= Done =**=
 
-$(LIBD)/$(LIBTEE).a: $(OBJST)
+$(LIBD)/$(PLATFORM)/$(LIBTEE).a: $(OBJST)
 	@echo ==== Building $@ [trusted library] ====
 	$(AR) $(ARFLAGS) $@ $^
 	@echo =**= Done =**=
 
-$(BIND)/$(SRVTEE)$(EXE): $(OBJSS)
+$(BIND)/$(PLATFORM)/$(SRVTEE)$(EXE): $(OBJSS)
 	@echo ==== Building $@ [trusted server] ====
 	$(CXX) $(LDFLAGS) $^ -o $@
 	@echo =**= Done =**=
 
 # Other project management label
 
-dirs: $(DIRS)
-$(DIRS):
+dirs: $(DIRS:%=%/$(PLATFORM))
+$(DIRS:%=%/$(PLATFORM)):
 	@for dir in $(DIRS); do \
-	  mkdir -p $$dir; \
+	  mkdir -p $$dir/$(PLATFORM); \
 	done
 
 clean:
-	@$(RM) $(foreach dir,$(DIRS),$(dir)/*)
+	@$(RM) $(foreach dir,$(DIRS),$(dir)/$(PLATFORM)/*)
 
 cleanall:
 	@$(RM) -r $(DIRS)
