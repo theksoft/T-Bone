@@ -1,5 +1,5 @@
 # -----------------------------------------------------------------------------
-# MAKEFILE project
+# TEE simulator project
 # -----------------------------------------------------------------------------
 # Project targets:
 # + t-bone server application is the TEE manager.
@@ -8,101 +8,65 @@
 # -----------------------------------------------------------------------------
 
 PLATFORM ?= linux
+
 SRVTEE := tbone
-LIBAPP := libtbapp
-LIBTEE := libtbtee
+LIBAPP := tbapp
+LIBTEE := tbtee
+
+LIBCUW := cuw
+ACUNIT := tbacu
+
 ifneq "$(PLATFORM)" "win"
   EXE := 
 else
   EXE := .exe
 endif
 
-# Project directory management
-# Include header & source directories as well as temporary build directories.
+# Project folders
+ROOTD ?= build
+BUILD ?= $(ROOTD)/$(PLATFORM)
+IMPD := $(BUILD)/include
+OBJD := $(BUILD)/obj
+LIBD := $(BUILD)/lib
+BIND := $(BUILD)/bin
+MKSD := mks
 
-INCD := include
-SRCD := source
-OBJD := obj
-LIBD := lib
-BIND := bin
+DIRS := $(IMPD) $(OBJD) $(LIBD) $(BIND)
 
-DIRS := $(OBJD) $(LIBD) $(BIND)
+# Project source path
 
-vpath %.h $(INCD):$(SRCD)
-vpath %.hpp $(INCD):$(SRCD)
-vpath %.cpp $(SRCD)
-vpath %.c $(SRCD)
-vpath %.o $(OBJD)/$(PLATFORM)
-vpath %.a $(LIBD)/$(PLATFORM)
-vpath %$(EXE) $(BIND)/$(PLATFORM)
-
-# Project source file list
-
-CXXTSSRC := ts-main
-CXXACSRC := ac-entry
-CTCSRC := tc-mem
-
-OBJSS := $(CXXTSSRC:%=%.o)
-OBJSC := $(CXXACSRC:%=%.o)
-OBJST := $(CTCSRC:%=%.o)
-
-# Compiler and linker options
-
-CXXINCLUDES := $(INCD)
-CINCLUDES := $(INCD)
-
-CFLAGS := -Wall -Wextra -Werror -Wpedantic -pedantic-errors -fPIC
-CXXFLAGS := -Wall -Wextra -Werror -Wpedantic -pedantic-errors -fPIC
-ARFLAGS := rcs
-LDFLAGS := -fPIC
+vpath %.a $(LIBD)
+vpath %$(EXE) $(BIND)
 
 # Main label
 
-all: dirs $(LIBAPP).a $(LIBTEE).a $(SRVTEE)$(EXE)
+all: dirs
+	$(MAKE) -f $(MKSD)/$(SRVTEE).mk
+	$(MAKE) -f $(MKSD)/$(LIBTEE).mk
+	$(MAKE) -f $(MKSD)/$(LIBAPP).mk
 
-# Project file dependencies
+test: all lib$(LIBCUW).a
+	$(MAKE) -f $(MKSD)/$(ACUNIT).mk
+	cp $(BIND)/$(ACUNIT).cfg $(BIND)/tbone-client.cfg
 
-$(OBJD)/$(PLATFORM)/ts-main.o: ts-main.cpp
-$(OBJD)/$(PLATFORM)/tc-mem.o: tc-mem.c
-$(OBJD)/$(PLATFORM)/ac-entry.o: ac-entry.cpp
+$(LIBD)/lib$(LIBCUW).a: ../$(LIBCUW)/Makefile
+	$(MAKE) -C ../$(LIBCUW) cleanall all install PRFX=$(CURDIR)/$(BUILD)
 
-# Project files build rules
+# Others project labels
 
-$(OBJD)/$(PLATFORM)/%.o: %.cpp
-	$(CXX) $(CXXFLAGS) $(CXXINCLUDES:%=-I %) -c $< -o $@
-
-$(OBJD)/$(PLATFORM)/%.o: %.c
-	$(CC) $(CFLAGS) $(CINCLUDES:%=-I %) -c $< -o $@
-
-# Project targets build
-
-$(LIBD)/$(PLATFORM)/$(LIBAPP).a: $(OBJSC)
-	@echo ==== Building $@ [application library] ====
-	$(AR) $(ARFLAGS) $@ $^
-	@echo =**= Done =**=
-
-$(LIBD)/$(PLATFORM)/$(LIBTEE).a: $(OBJST)
-	@echo ==== Building $@ [trusted library] ====
-	$(AR) $(ARFLAGS) $@ $^
-	@echo =**= Done =**=
-
-$(BIND)/$(PLATFORM)/$(SRVTEE)$(EXE): $(OBJSS)
-	@echo ==== Building $@ [trusted server] ====
-	$(CXX) $(LDFLAGS) $^ -o $@
-	@echo =**= Done =**=
-
-# Other project management label
-
-dirs: $(DIRS:%=%/$(PLATFORM))
-$(DIRS:%=%/$(PLATFORM)):
+dirs: $(DIRS)
+$(DIRS):
 	@for dir in $(DIRS); do \
-	  mkdir -p $$dir/$(PLATFORM); \
+	  mkdir -p $$dir; \
 	done
 
 clean:
-	@$(RM) $(foreach dir,$(DIRS),$(dir)/$(PLATFORM)/*)
+	@$(MAKE) -s -f $(MKSD)/$(SRVTEE).mk clean
+	@$(MAKE) -s -f $(MKSD)/$(LIBTEE).mk clean
+	@$(MAKE) -s -f $(MKSD)/$(LIBAPP).mk clean
+	@$(MAKE) -s -f $(MKSD)/$(ACUNIT).mk clean
 
 cleanall:
-	@$(RM) -r $(DIRS)
+	@$(RM) -r $(BUILD)
 
 .PHONY: all dirs clean cleanall
