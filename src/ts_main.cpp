@@ -1,5 +1,5 @@
+#include "ts_server.hpp"
 #include <iostream>
-
 #include <boost/asio.hpp>
 
 #if 1
@@ -32,9 +32,9 @@ void session(boost::asio::local::stream_protocol::socket sock)
   }
 }
 
-void server(boost::asio::io_context& io_context, std::string file)
+void server(std::string file)
 {
-  boost::asio::local::stream_protocol::acceptor a(io_context, boost::asio::local::stream_protocol::endpoint(file));
+  boost::asio::local::stream_protocol::acceptor a(tbone::server::TeeIOContext::get()->getIOContext(), boost::asio::local::stream_protocol::endpoint(file));
   for (;;)
   {
     std::thread(session, a.accept()).detach();
@@ -47,10 +47,9 @@ int main(int argc, char* argv[])
   (void)argc; (void)argv;
   try
   {
-    std::string file = "/tmp/sock-ac-unit";
+    std::string file = "/tmp/sock-ca-unit";
     ::unlink(file.c_str());
-    boost::asio::io_context io_context;
-    server(io_context, file);
+    server(file);
   }
   catch (std::exception& e)
   {
@@ -92,9 +91,9 @@ void session(tcp::socket sock)
   }
 }
 
-void server(boost::asio::io_context& io_context, unsigned short port)
+void server(unsigned short port)
 {
-  tcp::acceptor a(io_context, tcp::endpoint(tcp::v4(), port));
+  tcp::acceptor a(tbone::server::TeeIOContext::get()->getIOContext(), tcp::endpoint(tcp::v4(), port));
   for (;;)
   {
     std::thread(session, a.accept()).detach();

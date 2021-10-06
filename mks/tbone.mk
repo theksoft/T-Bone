@@ -36,7 +36,7 @@ vpath %$(EXE) $(BIND)
 
 # Project files
 
-CXXSRC := ts_main
+CXXSRC := ts_main ts_server_io
 OBJS := $(CXXSRC:%=%.o)
 OBJSD := $(CXXSRC:%=%-d.o)
 
@@ -55,6 +55,7 @@ all: dirs $(APPNAME)$(EXE)
 # Project file dependencies
 
 $(OBJD)/ts_main.o $(OBJD)/ts_main-d.o: ts_main.cpp
+$(OBJD)/ts_server_io.o $(OBJD)/ts_server_io-d.o: ts_server_io.cpp ts_server.hpp
 
 # Project files build rules
 
