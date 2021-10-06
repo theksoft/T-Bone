@@ -41,6 +41,9 @@ public:
   bool operator==(const TeeContext& other) const;
   inline bool operator!=(const TeeContext& other) const { return !(*this == other); }
 
+  bool hasSessions();
+  bool hasSharedMemoryBlocks();
+
   static TeeContext* create(TEEC_Context *context, const char *name);
 
 private:

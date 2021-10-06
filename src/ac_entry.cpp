@@ -43,6 +43,7 @@ TEEC_Result TEEC_InitializeContext(const char *name, TEEC_Context *context) {
     return TEEC_ERROR_BAD_PARAMETERS;
   }
 
+  // Programmer error
   if (TeeContextMap::get().match(context)) {
     std::cerr << TEEC_ERROR_CONTEXT_REINIT << " " << std::hex << context << std::endl;
     return TEEC_ERROR_GENERIC;
@@ -85,6 +86,7 @@ void TEEC_FinalizeContext(TEEC_Context *context) {
     return;
   }
 
+  // Programmer error
   if (!context->data || getMagic() != context->magic) {
     std::cerr << TEEC_ERROR_CONTEXT_REMOVE << " " << std::hex << context << std::endl;
     return;
@@ -95,6 +97,16 @@ void TEEC_FinalizeContext(TEEC_Context *context) {
   try {
     c = static_cast<TeeContext*>(context->data);
     assert(*c == context);
+    if (c->hasSessions()) {
+      // Programmer error
+      std::cerr << TEEC_ERROR_CONTEXT_RM_SESSIONS << " " << std::hex << context << std::endl;
+      return;
+    }
+    if (c->hasSharedMemoryBlocks()) {
+      // Programmer error
+      std::cerr << TEEC_ERROR_CONTEXT_RM_SHM << " " << std::hex << context << std::endl;
+      return;
+    }
     delete c;
   } catch(...) {
     std::cerr << TEEC_ERROR_CONTEXT_REMOVE << " " << std::hex << context << std::endl;

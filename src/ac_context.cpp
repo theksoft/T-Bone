@@ -69,6 +69,14 @@ void TeeContext::disconnect() {
   _tee->disconnect(reinterpret_cast<Tee::Owner>(_context));
 }
 
+bool TeeContext::hasSessions() {
+  return false;
+}
+
+bool TeeContext::hasSharedMemoryBlocks() {
+  return false;
+}
+
 TeeContext* TeeContext::create(TEEC_Context *context, const char *name) {
   assert(context);
   assert(!TeeContextMap::get().match(context));
