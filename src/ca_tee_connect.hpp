@@ -1,7 +1,7 @@
-#ifndef AC_TEE_CONNECT_HPP
-#define AC_TEE_CONNECT_HPP
+#ifndef CA_TEE_CONNECT_HPP
+#define CA_TEE_CONNECT_HPP
 
-#include "ac_tee_settings.hpp"
+#include "ca_tee_settings.hpp"
 #include "tb_ptr_vector.hxx"
 #include <boost/asio.hpp>
 
@@ -133,6 +133,6 @@ public:
 
 }   // namespace tbone::client
 
-#endif  // AC_TEE_CONNECT_HPP
+#endif  // CA_TEE_CONNECT_HPP
 
 // EOF

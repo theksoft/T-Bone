@@ -3,7 +3,7 @@
   This file is related to TEE context management unitary testing.
 */
 
-#include "ac_unit_tests.h"
+#include "ca_unit_tests.h"
 #include "tee_client_api.h"
 
 #include "c_cppstream.hpp"
@@ -48,7 +48,7 @@ static tCuwSuite suite = {
   .tests = tests
 };
 
-tCuwSuite* getACUnitContextSuite(void) {
+tCuwSuite* getCAUnitContextSuite(void) {
   return &suite;
 }
 

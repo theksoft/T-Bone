@@ -11,8 +11,8 @@
 */
 
 #include "tee_client_api.h"
-#include "ac_context.hpp"
-#include "ac_tee.hpp"
+#include "ca_context.hpp"
+#include "ca_tee.hpp"
 #include "tb_errors.hpp"
 #include <cassert>
 #include <iostream>

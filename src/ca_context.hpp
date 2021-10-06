@@ -1,9 +1,9 @@
-#ifndef AC_CONTEXT_HPP
-#define AC_CONTEXT_HPP
+#ifndef CA_CONTEXT_HPP
+#define CA_CONTEXT_HPP
 
 #include "tee_client_api.h"
 #include "tb_ptr_vector.hxx"
-#include "ac_tee.hpp"
+#include "ca_tee.hpp"
 
 namespace tbone::client {
 
@@ -62,6 +62,6 @@ inline bool operator!= (const TEEC_Context* lhs, const TeeContext& rhs) { return
 
 }   // namespace tbone::client
 
-#endif  // AC_CONTEXT_HPP
+#endif  // CA_CONTEXT_HPP
 
 // EOF

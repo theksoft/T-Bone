@@ -1,4 +1,4 @@
-#include "ac_tee_settings.hpp"
+#include "ca_tee_settings.hpp"
 #include <cassert>
 #include <libconfig.h++>
 #include "tb_errors.hpp"

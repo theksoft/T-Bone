@@ -1,5 +1,5 @@
-#ifndef AC_TEE_SETTINGS_HPP
-#define AC_TEE_SETTINGS_HPP
+#ifndef CA_TEE_SETTINGS_HPP
+#define CA_TEE_SETTINGS_HPP
 
 #include <string>
 #include <vector>
@@ -67,6 +67,6 @@ public:
 
 }   // namespace tbone::client
 
-#endif  // AC_TEE_SETTINGS_HPP
+#endif  // CA_TEE_SETTINGS_HPP
 
 // EOF

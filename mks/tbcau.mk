@@ -3,7 +3,7 @@
 # -----------------------------------------------------------------------------
 
 PLATFORM ?= linux
-APPNAME := tbacu
+APPNAME := tbcau
 LIBAPP := tbapp
 LIBCUW := cuw
 
@@ -42,7 +42,7 @@ vpath %$(EXE) $(BIND)
 # Project files
 
 CSRC := c_cppstream
-CXXSRC := ac_unit_main ac_unit_context
+CXXSRC := ca_unit_main ca_unit_context
 OBJS := $(CXXSRC:%=%.o) $(CSRC:%=%.o) 
 
 #Project options
@@ -63,8 +63,8 @@ all: dirs $(APPNAME)$(EXE)
 
 $(OBJD)/c_cppstream.o: c_cppstream.cpp c_cppstream.hpp
 
-$(OBJD)/ac_unit_main.o: ac_unit_main.c ac_unit_tests.h cuw.h
-$(OBJD)/ac_unit_context.o: ac_unit_context.c ac_unit_tests.h cuw.h tb_errors.hpp
+$(OBJD)/ca_unit_main.o: ca_unit_main.c ca_unit_tests.h cuw.h
+$(OBJD)/ca_unit_context.o: ca_unit_context.c ca_unit_tests.h cuw.h tb_errors.hpp
 $(BIND)/$(APPNAME)$(EXE): libcuw.a lib$(LIBAPP)d.a
 
 # Project files build rules

@@ -1,7 +1,7 @@
-#ifndef AC_TEE_HPP
-#define AC_TEE_HPP
+#ifndef CA_TEE_HPP
+#define CA_TEE_HPP
 
-#include "ac_tee_connect.hpp"
+#include "ca_tee_connect.hpp"
 #include <string>
 #include <memory>
 #include <map>
@@ -59,6 +59,6 @@ private:
 
 }   // namespace tbone::client
 
-#endif  // AC_TEE_HPP
+#endif  // CA_TEE_HPP
 
 // EOF
