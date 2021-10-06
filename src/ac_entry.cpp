@@ -68,8 +68,8 @@ TEEC_Result TEEC_InitializeContext(const char *name, TEEC_Context *context) {
   }
 
   // Assign it
-  context->magic = getMagic();
-  context->data = reinterpret_cast<void*>(c);
+  context->imp.magic = getMagic();
+  context->imp.data = reinterpret_cast<void*>(c);
 
   return TEEC_SUCCESS;
 }
@@ -87,7 +87,7 @@ void TEEC_FinalizeContext(TEEC_Context *context) {
   }
 
   // Programmer error
-  if (!context->data || getMagic() != context->magic) {
+  if (!context->imp.data || getMagic() != context->imp.magic) {
     std::cerr << TEEC_ERROR_CONTEXT_REMOVE << " " << std::hex << context << std::endl;
     return;
   }
@@ -95,7 +95,7 @@ void TEEC_FinalizeContext(TEEC_Context *context) {
   // Reinterpret imp field
   TeeContext *c = NULL;
   try {
-    c = static_cast<TeeContext*>(context->data);
+    c = static_cast<TeeContext*>(context->imp.data);
     assert(*c == context);
     if (c->hasSessions()) {
       // Programmer error
@@ -113,8 +113,8 @@ void TEEC_FinalizeContext(TEEC_Context *context) {
     return;
   }
 
-  context->magic = 0;
-  context->data = NULL;
+  context->imp.magic = 0;
+  context->imp.data = NULL;
 }
 
 // EOF
