@@ -35,7 +35,7 @@ void TeeContextMap::reset() {
 
 TeeContext* TeeContextMap::match(TEEC_Context *context) {
   std::lock_guard<std::recursive_mutex> lock(_guard);
-  for (auto it = begin(); it != end(); it = begin()) {
+  for (auto it = begin(); it != end(); it++) {
     if (*(*it) == context) {
       return *it;
     }
