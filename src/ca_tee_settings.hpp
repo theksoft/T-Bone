@@ -1,6 +1,8 @@
 #ifndef CA_TEE_SETTINGS_HPP
 #define CA_TEE_SETTINGS_HPP
 
+#include "tb_tee_settings.hpp"
+
 #include <string>
 #include <vector>
 #include <map>
@@ -11,12 +13,6 @@ namespace tbone::client {
 
 class TeeSettings;
 class TeeSettingsMap;
-
-#define TEEC_DEFAULT_CONFIG_FILENAME  "tbone-client.cfg"
-#define TEEC_DEFAULT_TEE_NAME         "*"
-#define TEEC_CONNECTION_TCP           "net-tcp"
-#define TEEC_CONNECTION_LOCAL         "local"
-#define TEEC_CONNECTION_LOCAL_ADDRESS "sock-default-tee-connection"
 
 //------------------------------------------------------------------------------
 
