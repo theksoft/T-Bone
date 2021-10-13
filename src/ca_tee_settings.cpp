@@ -85,11 +85,14 @@ bool TeeSettingsMap::createDefault() {
 // Reading from configuration file
 //------------------------------------------------------------------------------
 
+#if 0
 #define TEEC_SETTING_LIST             "TEEs"
 #define TEEC_SETTING_NAME             "name"
 #define TEEC_SETTING_DOMAIN           "domain"
 #define TEEC_SETTING_ADDRESS          "address"
 #define TEEC_SETTING_PORT             "port"
+ #endif
+
 
 bool TeeSettingsMap::addFile(const std::string filename) {
 
@@ -131,17 +134,19 @@ bool TeeSettingsMap::addFile(const std::string filename) {
       for(;;) {
 
         if (  tee.lookupValue(TEEC_SETTING_NAME, name)
-              && tee.lookupValue(TEEC_SETTING_DOMAIN, domain)
-              && tee.lookupValue(TEEC_SETTING_ADDRESS, address))
+              && tee.lookupValue(TEEC_SETTING_DOMAIN, domain) )
         {
-          if (!name.empty() && !address.empty()) {
+          if (!name.empty()) {
             // Local domain connection
             if (0 == domain.compare(TEEC_CONNECTION_LOCAL)) {
-              break;
+              if (tee.lookupValue(TEEC_SETTING_PIPE, address) && !address.empty()) {
+                break;
+              }
             }
             // TCP domain connection
             if (0 == domain.compare(TEEC_CONNECTION_TCP)) {
-              if (tee.lookupValue(TEEC_SETTING_PORT, port) && 0 != port) {
+              if ( (tee.lookupValue(TEEC_SETTING_ADDRESS, address) && !address.empty())
+                && (tee.lookupValue(TEEC_SETTING_PORT, port) && 0 != port) ) {
                 break;
               }
             }
