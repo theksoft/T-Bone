@@ -37,7 +37,7 @@ vpath %$(EXE) $(BIND)
 
 # Project files
 
-CXXSRC := ts_main ts_server_io ts_tee_settings
+CXXSRC := ts_main ts_server_app ts_server_io ts_tee_settings
 OBJS := $(CXXSRC:%=%.o)
 OBJSD := $(CXXSRC:%=%-d.o)
 
@@ -55,8 +55,9 @@ all: dirs $(APPNAME)$(EXE) $(APPNAME)-d$(EXE)
 
 # Project file dependencies
 
-$(OBJD)/ts_main.o $(OBJD)/ts_main-d.o: ts_main.cpp ts_server.hpp ts_server_app.hxx
-$(OBJD)/ts_server_io.o $(OBJD)/ts_server_io-d.o: ts_server_io.cpp ts_server.hpp ts_server_app.hxx
+$(OBJD)/ts_main.o $(OBJD)/ts_main-d.o: ts_main.cpp ts_server.hpp ts_server_app.hxx tb_network.hxx
+$(OBJD)/ts_server_app.o $(OBJD)/ts_server_app-d.o: ts_server_app.cpp ts_server.hpp ts_server_app.hxx tb_network.hxx
+$(OBJD)/ts_server_io.o $(OBJD)/ts_server_io-d.o: ts_server_io.cpp ts_server.hpp ts_server_app.hxx tb_network.hxx
 $(OBJD)/ts_tee_settings.o $(OBJD)/ts_tee_settings-d.o: ts_tee_settings.cpp ts_tee_settings.hpp
 
 # Project files build rules

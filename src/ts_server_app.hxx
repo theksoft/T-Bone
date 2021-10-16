@@ -82,6 +82,32 @@ private:
 };
 
 //==============================================================================
+// Explicit instanciation references
+//==============================================================================
+
+extern template
+class AppServer<
+  bstlocal::stream_protocol::socket,
+  bstlocal::stream_protocol::acceptor
+>;
+
+extern template 
+class AppServer<
+  bstip::tcp::socket,
+  bstip::tcp::acceptor
+>;
+
+typedef AppServer<
+  bstlocal::stream_protocol::socket,
+  bstlocal::stream_protocol::acceptor
+> AppLocalServer;
+
+typedef AppServer<
+  bstip::tcp::socket,
+  bstip::tcp::acceptor
+> AppTcpServer;
+
+//==============================================================================
 
 } // namespace tbone::server
 
