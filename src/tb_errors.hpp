@@ -22,6 +22,11 @@
 
 #define TEEC_ERROR_CONNECTION           "00000010 ERROR CONNECTION Cannot connect to "
 
+#define TEE_ERROR_CONFIG_READ           TEEC_ERROR_CONFIG_READ
+#define TEE_ERROR_CONFIG_PARSE          TEEC_ERROR_CONFIG_PARSE
+#define TEE_ERROR_CONFIG_MISSING        TEEC_ERROR_CONFIG_MISSING
+#define TEE_ERROR_CONFIG_BAD            TEEC_ERROR_CONFIG_BAD
+
 // Client errors
 
 #define TEEC_ERROR_CONTEXT_REINIT       "00010000 ERROR Attempting to intialize again a managed TEEC_Context"

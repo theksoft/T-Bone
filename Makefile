@@ -48,6 +48,7 @@ all: dirs
 test: all lib$(LIBCUW).a
 	$(MAKE) -f $(MKSD)/$(CAUNIT).mk
 	cp $(BIND)/$(CAUNIT).cfg $(BIND)/tbone-client.cfg
+	cp $(BIND)/$(CAUNIT)s.cfg $(BIND)/tbone-server.cfg
 
 $(LIBD)/lib$(LIBCUW).a: ../$(LIBCUW)/Makefile
 	$(MAKE) -C ../$(LIBCUW) cleanall all install PRFX=$(CURDIR)/$(BUILD)

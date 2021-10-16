@@ -27,6 +27,7 @@ DIRS := $(IMPD) $(OBJD) $(LIBD) $(BIND)
 # Project source path
 
 vpath %.h $(INCD):$(SRCD)
+vpath %.hxx $(INCD):$(SRCD)
 vpath %.hpp $(INCD):$(SRCD)
 vpath %.cpp $(SRCD)
 vpath %.c $(SRCD)
@@ -36,7 +37,7 @@ vpath %$(EXE) $(BIND)
 
 # Project files
 
-CXXSRC := ts_main ts_server_io
+CXXSRC := ts_main ts_server_io ts_tee_settings
 OBJS := $(CXXSRC:%=%.o)
 OBJSD := $(CXXSRC:%=%-d.o)
 
@@ -46,16 +47,17 @@ CXXINCLUDES := $(INCD)
 
 CXXFLAGS := -Wall -Wextra -Werror -Wpedantic -pedantic-errors -fPIC -std=c++17
 LDFLAGS := -fPIC
-LIBFLAGS := -lboost_thread -lrt -lm -pthread
+LIBFLAGS := -lconfig++ -lboost_thread -lrt -lm -pthread
 
 # Main label
 
-all: dirs $(APPNAME)$(EXE)
+all: dirs $(APPNAME)$(EXE) $(APPNAME)-d$(EXE)
 
 # Project file dependencies
 
-$(OBJD)/ts_main.o $(OBJD)/ts_main-d.o: ts_main.cpp
-$(OBJD)/ts_server_io.o $(OBJD)/ts_server_io-d.o: ts_server_io.cpp ts_server.hpp
+$(OBJD)/ts_main.o $(OBJD)/ts_main-d.o: ts_main.cpp ts_server.hpp ts_server_app.hxx
+$(OBJD)/ts_server_io.o $(OBJD)/ts_server_io-d.o: ts_server_io.cpp ts_server.hpp ts_server_app.hxx
+$(OBJD)/ts_tee_settings.o $(OBJD)/ts_tee_settings-d.o: ts_tee_settings.cpp ts_tee_settings.hpp
 
 # Project files build rules
 
@@ -72,7 +74,7 @@ $(BIND)/$(APPNAME)$(EXE): $(OBJS)
 	$(CXX) $(LDFLAGS) $^ $(LIBFLAGS) -o $@
 	@echo =**= Done =**=
 
-$(BIND)/$(APPNAME)d$(EXE): $(OBJSD)
+$(BIND)/$(APPNAME)-d$(EXE): $(OBJSD)
 	@echo ==== Building $@ [trusted server] ====
 	$(CXX) $(LDFLAGS) $^ $(LIBFLAGS) -o $@
 	@echo =**= Done =**=

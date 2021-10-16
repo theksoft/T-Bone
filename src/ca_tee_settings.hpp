@@ -19,13 +19,13 @@ class TeeSettingsMap;
 class TeeSettings {
 
 private:
-  std::string _domain;
+  std::string _protocol;
   std::string _address;
   int _port;
 
 public:
   TeeSettings(
-    const std::string& domain = TEEC_CONNECTION_LOCAL,
+    const std::string& protocol = TEEC_CONNECTION_LOCAL,
     const std::string& address = TEEC_CONNECTION_LOCAL_ADDRESS,
     int port = 0
   );
@@ -34,12 +34,12 @@ public:
 
   TeeSettings& operator=(const TeeSettings& other);
 
-  const std::string& getDomain() const  { return _domain; }
-  const std::string& getAddress() const { return _address; }
-  int getPort() const                   { return _port; }
+  const std::string& getProtocol() const  { return _protocol; }
+  const std::string& getAddress() const   { return _address; }
+  int getPort() const                     { return _port; }
 
-  bool isLocal() const  { return (0 == _domain.compare(TEEC_CONNECTION_LOCAL)); }
-  bool isTcp() const    { return (0 == _domain.compare(TEEC_CONNECTION_TCP)); }
+  bool isLocal() const  { return (0 == _protocol.compare(TEEC_CONNECTION_LOCAL)); }
+  bool isTcp() const    { return (0 == _protocol.compare(TEEC_CONNECTION_TCP)); }
 
 };
 

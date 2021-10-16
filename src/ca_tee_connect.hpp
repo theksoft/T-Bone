@@ -2,8 +2,8 @@
 #define CA_TEE_CONNECT_HPP
 
 #include "ca_tee_settings.hpp"
+#include "tb_network.hxx"
 #include "tb_ptr_vector.hxx"
-#include <boost/asio.hpp>
 
 namespace tbone::client {
 
@@ -15,11 +15,6 @@ class TeeLocalConnection;
 class TeeTcpConnection;
 class TeeConnector;
 class TeeConnectorList;
-
-namespace bstnet = boost::asio;
-namespace bstip = boost::asio::ip;
-namespace bstlocal = boost::asio::local;
-namespace bstsys = boost::system;
 
 //------------------------------------------------------------------------------
 

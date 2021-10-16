@@ -81,6 +81,7 @@ $(BIND)/$(APPNAME)$(EXE): $(OBJS)
 	@echo ==== Building $@ [unit test client] ====
 	$(CXX) $(LDFLAGS) $^ $(LIBFLAGS) -o $@
 	cp $(TSTD)/$(APPNAME).cfg $(BIND)/$(APPNAME).cfg
+	cp $(TSTD)/$(APPNAME)s.cfg $(BIND)/$(APPNAME)s.cfg
 	@echo =**= Done =**=
 
 # Other project label

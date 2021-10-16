@@ -3,8 +3,8 @@
 // Note: std::set requires key. This implementation has no key.
 //==============================================================================
 
-#ifndef TB_PTR_VECTOR
-#define TB_PTR_VECTOR
+#ifndef TB_PTR_VECTOR_HXX
+#define TB_PTR_VECTOR_HXX
 
 #include <vector>
 #include <mutex>
@@ -101,6 +101,6 @@ protected:
 
 } // namespace tbone
 
-#endif// TB_PTR_VECTOR
+#endif// TB_PTR_VECTOR_HXX
 
 // End of file

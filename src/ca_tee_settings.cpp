@@ -8,35 +8,35 @@ namespace tbone::client {
 //==============================================================================
 
 TeeSettings::TeeSettings(
-  const std::string& domain,
+  const std::string& protocol,
   const std::string& address,
   int port
 ) :
-  _domain(domain),
+  _protocol(protocol),
   _address(address),
   _port(port)
 {
   assert(
-    0 == domain.compare(TEEC_CONNECTION_LOCAL) ||
-    (0 == domain.compare(TEEC_CONNECTION_TCP) && 0 != port)
+    0 == protocol.compare(TEEC_CONNECTION_LOCAL) ||
+    (0 == protocol.compare(TEEC_CONNECTION_TCP) && 0 != port)
   );
 }
 
 TeeSettings::TeeSettings(TeeSettings& settings) :
-  _domain(settings._domain),
+  _protocol(settings._protocol),
   _address(settings._address),
   _port(settings._port)
 {}
 
 TeeSettings::~TeeSettings() {
-  _domain.clear();
+  _protocol.clear();
   _address.clear();
   _port = 0;
 }
 
 TeeSettings& TeeSettings::operator=(const TeeSettings& other) {
   if (this != &other) {
-    _domain = other._domain;
+    _protocol = other._protocol;
     _address = other._address;
     _port = other._port;
   }
@@ -85,15 +85,6 @@ bool TeeSettingsMap::createDefault() {
 // Reading from configuration file
 //------------------------------------------------------------------------------
 
-#if 0
-#define TEEC_SETTING_LIST             "TEEs"
-#define TEEC_SETTING_NAME             "name"
-#define TEEC_SETTING_DOMAIN           "domain"
-#define TEEC_SETTING_ADDRESS          "address"
-#define TEEC_SETTING_PORT             "port"
- #endif
-
-
 bool TeeSettingsMap::addFile(const std::string filename) {
 
   libconfig::Config config;
@@ -127,24 +118,24 @@ bool TeeSettingsMap::addFile(const std::string filename) {
     for (int i = 0; i < count; i++) {
 
       const libconfig::Setting &tee = tees[i];
-      std::string name = "", domain = "", address = "";
+      std::string name = "", protocol = "", address = "";
       int port = 0;
 
       // Check if all settings have been found & correct
       for(;;) {
 
         if (  tee.lookupValue(TEEC_SETTING_NAME, name)
-              && tee.lookupValue(TEEC_SETTING_DOMAIN, domain) )
+              && tee.lookupValue(TEEC_SETTING_PROTOCOL, protocol) )
         {
           if (!name.empty()) {
-            // Local domain connection
-            if (0 == domain.compare(TEEC_CONNECTION_LOCAL)) {
+            // Local connection
+            if (0 == protocol.compare(TEEC_CONNECTION_LOCAL)) {
               if (tee.lookupValue(TEEC_SETTING_PIPE, address) && !address.empty()) {
                 break;
               }
             }
-            // TCP domain connection
-            if (0 == domain.compare(TEEC_CONNECTION_TCP)) {
+            // TCP connection
+            if (0 == protocol.compare(TEEC_CONNECTION_TCP)) {
               if ( (tee.lookupValue(TEEC_SETTING_ADDRESS, address) && !address.empty())
                 && (tee.lookupValue(TEEC_SETTING_PORT, port) && 0 != port) ) {
                 break;
@@ -154,7 +145,7 @@ bool TeeSettingsMap::addFile(const std::string filename) {
         }
 
         std::cerr << TEEC_ERROR_CONFIG_BAD
-                  << name << " : " << domain << " : " << address << " : " << port << std::endl;
+                  << name << " : " << protocol << " : " << address << " : " << port << std::endl;
         return false;
       }
 
@@ -165,7 +156,7 @@ bool TeeSettingsMap::addFile(const std::string filename) {
 
       // Map new element
       try {
-        insert({ name, new TeeSettings(domain, address, port) });
+        insert({ name, new TeeSettings(protocol, address, port) });
       } catch (const std::exception &e) {
         std::cerr << TEEC_ERROR_CONFIG_ERROR << " : " << e.what() << std::endl;
         return false;

@@ -119,6 +119,14 @@ static void initialize2finalizeContext(void) {
     CU_ASSERT(TEEC_SUCCESS == TEEC_InitializeContext(NULL, &c));
     TEEC_FinalizeContext(&c);
   }
+
+  CU_ASSERT(TEEC_SUCCESS == (r = TEEC_InitializeContext("TEE", &c)));
+  if (TEEC_SUCCESS == r) {
+    TEEC_FinalizeContext(&c);
+    // Redo => Check availability
+    CU_ASSERT(TEEC_SUCCESS == TEEC_InitializeContext("TEE", &c));
+    TEEC_FinalizeContext(&c);
+  }
 }
 
 /* --------------------------------------------------------------------------

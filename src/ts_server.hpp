@@ -1,18 +1,14 @@
 #ifndef TS_SERVER_HPP
 #define TS_SERVER_HPP
 
-#include <boost/asio.hpp>
+#include "tb_network.hxx"
+#include "ts_server_app.hxx"
 
 namespace tbone::server {
 
 //==============================================================================
 
 class TeeIOContext;
-
-namespace bstnet = boost::asio;
-namespace bstip = boost::asio::ip;
-namespace bstlocal = boost::asio::local;
-namespace bstsys = boost::system;
 
 //==============================================================================
 
@@ -24,12 +20,13 @@ class TeeIOContext {
    */
 
 private:
-  TeeIOContext() {}
-  ~TeeIOContext() { _theIOContext = NULL; }  // Not intended to be called
+  TeeIOContext();
+  ~TeeIOContext();
 public:
   bstnet::io_context& getIOContext()  { return _ioContext; }
 private:
   bstnet::io_context _ioContext;
+  bstnet::signal_set _signals;
 
   /*
    * Singleton management
