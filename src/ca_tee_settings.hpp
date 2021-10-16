@@ -1,7 +1,7 @@
 #ifndef CA_TEE_SETTINGS_HPP
 #define CA_TEE_SETTINGS_HPP
 
-#include "tb_tee_settings.hpp"
+#include "tb_settings.hpp"
 
 #include <string>
 #include <vector>
@@ -25,8 +25,8 @@ private:
 
 public:
   TeeSettings(
-    const std::string& protocol = TEEC_CONNECTION_LOCAL,
-    const std::string& address = TEEC_CONNECTION_LOCAL_ADDRESS,
+    const std::string& protocol = TEEC_SETTING_VAL_CONNECTION_LOCAL,
+    const std::string& address = TEEC_SETTING_VAL_CONNECTION_LOCAL_ADDRESS,
     int port = 0
   );
   TeeSettings(TeeSettings& settings);
@@ -38,8 +38,8 @@ public:
   const std::string& getAddress() const   { return _address; }
   int getPort() const                     { return _port; }
 
-  bool isLocal() const  { return (0 == _protocol.compare(TEEC_CONNECTION_LOCAL)); }
-  bool isTcp() const    { return (0 == _protocol.compare(TEEC_CONNECTION_TCP)); }
+  bool isLocal() const  { return (0 == _protocol.compare(TEEC_SETTING_VAL_CONNECTION_LOCAL)); }
+  bool isTcp() const    { return (0 == _protocol.compare(TEEC_SETTING_VAL_CONNECTION_TCP)); }
 
 };
 

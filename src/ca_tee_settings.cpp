@@ -17,8 +17,8 @@ TeeSettings::TeeSettings(
   _port(port)
 {
   assert(
-    0 == protocol.compare(TEEC_CONNECTION_LOCAL) ||
-    (0 == protocol.compare(TEEC_CONNECTION_TCP) && 0 != port)
+    0 == protocol.compare(TEEC_SETTING_VAL_CONNECTION_LOCAL) ||
+    (0 == protocol.compare(TEEC_SETTING_VAL_CONNECTION_TCP) && 0 != port)
   );
 }
 
@@ -65,7 +65,7 @@ bool TeeSettingsMap::isPresent(const std::string& name) const {
 }
 
 bool TeeSettingsMap::hasDefault() const {
-  return isPresent(TEEC_DEFAULT_TEE_NAME);
+  return isPresent(TEEC_SETTING_VAL_DEFAULT_TEE_NAME);
 }
 
 bool TeeSettingsMap::createDefault() {
@@ -73,7 +73,7 @@ bool TeeSettingsMap::createDefault() {
     return false;
   }
   try {
-    insert({ TEEC_DEFAULT_TEE_NAME, new TeeSettings });
+    insert({ TEEC_SETTING_VAL_DEFAULT_TEE_NAME, new TeeSettings });
   } catch (const std::exception &e) {
     std::cerr << TEEC_ERROR_CONFIG_ERROR << " : " << e.what() << std::endl;
     return false;
@@ -108,7 +108,7 @@ bool TeeSettingsMap::addFile(const std::string filename) {
   try {
 
     // Lookup Tee objects in configuration
-    const libconfig::Setting &tees = (config.getRoot())[TEEC_SETTING_LIST];
+    const libconfig::Setting &tees = (config.getRoot())[TEEC_SETTING_KEY_LIST];
     int count = tees.getLength();
     if (!count) {
       std::cerr << TEEC_ERROR_CONFIG_EMPTY << std::endl;
@@ -124,20 +124,20 @@ bool TeeSettingsMap::addFile(const std::string filename) {
       // Check if all settings have been found & correct
       for(;;) {
 
-        if (  tee.lookupValue(TEEC_SETTING_NAME, name)
-              && tee.lookupValue(TEEC_SETTING_PROTOCOL, protocol) )
+        if (  tee.lookupValue(TEEC_SETTING_KEY_NAME, name)
+              && tee.lookupValue(TEEC_SETTING_KEY_PROTOCOL, protocol) )
         {
           if (!name.empty()) {
             // Local connection
-            if (0 == protocol.compare(TEEC_CONNECTION_LOCAL)) {
-              if (tee.lookupValue(TEEC_SETTING_PIPE, address) && !address.empty()) {
+            if (0 == protocol.compare(TEEC_SETTING_VAL_CONNECTION_LOCAL)) {
+              if (tee.lookupValue(TEEC_SETTING_KEY_PIPE, address) && !address.empty()) {
                 break;
               }
             }
             // TCP connection
-            if (0 == protocol.compare(TEEC_CONNECTION_TCP)) {
-              if ( (tee.lookupValue(TEEC_SETTING_ADDRESS, address) && !address.empty())
-                && (tee.lookupValue(TEEC_SETTING_PORT, port) && 0 != port) ) {
+            if (0 == protocol.compare(TEEC_SETTING_VAL_CONNECTION_TCP)) {
+              if ( (tee.lookupValue(TEEC_SETTING_KEY_ADDRESS, address) && !address.empty())
+                && (tee.lookupValue(TEEC_SETTING_KEY_PORT, port) && 0 != port) ) {
                 break;
               }
             }

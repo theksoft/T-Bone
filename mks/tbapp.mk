@@ -57,12 +57,12 @@ all: dirs lib$(LIBNAME).a lib$(LIBNAME)d.a
 
 $(OBJD)/ca_context.o $(OBJD)/ca_context-d.o: ca_context.cpp ca_context.hpp ca_tee.hpp tb_ptr_vector.hxx tee_client_api.h
 $(OBJD)/ca_entry.o $(OBJD)/ca_entry-d.o: ca_entry.cpp ca_context.hpp ca_tee.hpp tb_errors.hpp tee_client_api.h
-$(OBJD)/ca_tee.o $(OBJD)/ca_tee-d.o: ca_tee.cpp ca_tee.hpp ca_tee_connect.hpp ca_tee_settings.hpp tb_errors.hpp
+$(OBJD)/ca_tee.o $(OBJD)/ca_tee-d.o: ca_tee.cpp ca_tee.hpp ca_tee_connect.hpp ca_tee_settings.hpp tb_settings.hpp tb_errors.hpp
 $(OBJD)/ca_tee_connect_io.o $(OBJD)/ca_tee_connect_io-d.o: ca_tee_connect_io.cpp ca_tee_connect.hpp tb_network.hxx
 $(OBJD)/ca_tee_connect_local.o $(OBJD)/ca_tee_connect_local-d.o: ca_tee_connect_local.cpp ca_tee_connect.hpp tb_network.hxx
 $(OBJD)/ca_tee_connect_tcp.o $(OBJD)/ca_tee_connect_tcp-d.o: ca_tee_connect_tcp.cpp ca_tee_connect.hpp tb_network.hxx
-$(OBJD)/ca_tee_connect.o $(OBJD)/ca_tee_connect-d.o: ca_tee_connect.cpp ca_tee_connect.hpp ca_tee_settings.hpp tb_tee_settings.hpp tb_ptr_vector.hxx tb_network.hxx
-$(OBJD)/ca_tee_settings.o $(OBJD)/ca_tee_settings-d.o: ca_tee_settings.cpp ca_tee_settings.hpp tb_tee_settings.hpp tb_errors.hpp
+$(OBJD)/ca_tee_connect.o $(OBJD)/ca_tee_connect-d.o: ca_tee_connect.cpp ca_tee_connect.hpp ca_tee_settings.hpp tb_settings.hpp tb_ptr_vector.hxx tb_network.hxx
+$(OBJD)/ca_tee_settings.o $(OBJD)/ca_tee_settings-d.o: ca_tee_settings.cpp ca_tee_settings.hpp tb_settings.hpp tb_errors.hpp
 
 # Project files build rules
 

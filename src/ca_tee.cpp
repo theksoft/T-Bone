@@ -75,7 +75,7 @@ bool TeeMap::create(const char *filename) {
 
 Tee* TeeMap::match(const char *name) {
   create();
-  std::string teeName = (name) ? name : TEEC_DEFAULT_TEE_NAME;
+  std::string teeName = (name) ? name : TEEC_SETTING_VAL_DEFAULT_TEE_NAME;
   auto it = find(teeName);
   return (end() == it) ? NULL : it->second;
 }

@@ -1,5 +1,6 @@
+#include "tb_errors.hpp"
 #include "ts_server.hpp"
-#include "ts_tee_settings.hpp"
+#include "ts_settings.hpp"
 #include <iostream>
 
 //==============================================================================
@@ -14,7 +15,7 @@ public:
       _error(false),
       _help(false),
       _errorMessage(""),
-      _configurationFile(TEE_DEFAULT_CONFIG_FILENAME) {
+      _configurationFile(TEES_DEFAULT_CONFIG_FILENAME) {
 
     if (argc) { _command = argv[0]; }
 
@@ -57,7 +58,7 @@ public:
     std::cout << "Usage: " << _command << " [options]" << std::endl;
     std::cout << "Options:" << std::endl;
     std::cout << "  -c <filepath>  <filepath> for configuration file." << std::endl
-              << "                 Default is \"" << TEE_DEFAULT_CONFIG_FILENAME << "\".)" << std::endl;
+              << "                 Default is \"" << TEES_DEFAULT_CONFIG_FILENAME << "\".)" << std::endl;
     std::cout << "  -h             Display this help and exit." << std::endl;
     std::cout << std::endl;
   }
@@ -98,7 +99,7 @@ int main(int argc, char* argv[])
     return 0;
   }
 
-  TeeSettings settings;
+  ServerSettings settings;
   if (!settings.readFile(opt.getConfigurationFile())) {
     return 0;
   }
@@ -136,7 +137,7 @@ int main(int argc, char* argv[])
     if (oneOfAppServiceSet) {
       TeeIOContext::get()->getIOContext().run();
     } else {
-      std::cerr << "No application service defines!" << std::endl;
+      std::cerr << TEES_ERROR_CONFIG_NO_SERVICE << std::endl;
     }
   }
   catch (std::exception& e)
