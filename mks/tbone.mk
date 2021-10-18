@@ -39,7 +39,7 @@ vpath %$(EXE) $(BIND)
 
 CXXSRC := ts_main ts_server_app ts_server_io ts_settings
 OBJS := $(CXXSRC:%=%.o)
-OBJSD := $(CXXSRC:%=%-d.o)
+OBJSD := $(CXXSRC:%=%-g.o)
 
 #Project options
 
@@ -55,17 +55,21 @@ all: dirs $(APPNAME)$(EXE) $(APPNAME)-d$(EXE)
 
 # Project file dependencies
 
-$(OBJD)/ts_main.o $(OBJD)/ts_main-d.o: ts_main.cpp ts_server.hpp ts_server_app.hxx tb_network.hxx tb_errors.hpp
-$(OBJD)/ts_server_app.o $(OBJD)/ts_server_app-d.o: ts_server_app.cpp ts_server.hpp ts_server_app.hxx tb_network.hxx
-$(OBJD)/ts_server_io.o $(OBJD)/ts_server_io-d.o: ts_server_io.cpp ts_server.hpp ts_server_app.hxx tb_network.hxx
-$(OBJD)/ts_settings.o $(OBJD)/ts_settings-d.o: ts_settings.cpp ts_settings.hpp tb_settings.hpp tb_errors.hpp
+DEPD := $(OBJD)/dep
+DEPS := $(CXXSRC:%=$(DEPD)/%.d)
+
+$(DEPD)/%.d: %.cpp | $(DEPD)
+	@$(CXX) -MM -MP -MT $(OBJD)/$(basename $(<F)).o -MT $(OBJD)/$(basename $(<F))-g.o $(CXXFLAGS) $(CXXINCLUDES:%=-I %) $< > $@
+
+$(DEPD):
+	@mkdir -p $@
 
 # Project files build rules
 
 $(OBJD)/%.o: %.cpp
 	$(CXX) $(CXXFLAGS) $(CXXINCLUDES:%=-I %) -DNDEBUG=1 -c $< -o $@
 
-$(OBJD)/%-d.o: %.cpp
+$(OBJD)/%-g.o: %.cpp
 	$(CXX) $(CXXFLAGS) $(CXXINCLUDES:%=-I %) -c $< -o $@
 
 # Project targets build
@@ -93,8 +97,12 @@ clean:
 	-@$(RM) $(BIND)/$(APPNAME)d$(EXE)
 	-@$(RM) $(OBJS:%=$(OBJD)/%)
 	-@$(RM) $(OBJSD:%=$(OBJD)/%)
+	-@$(RM) $(DEPS)
 
 cleanall:
-	@$(RM) -r $(DIRS)
+	@$(RM) -rf $(DEPD)
+	@$(RM) -rf $(DIRS)
 
 .PHONY: all dirs clean cleanall
+
+-include $(DEPS)

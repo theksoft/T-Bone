@@ -61,10 +61,18 @@ all: dirs $(APPNAME)$(EXE)
 
 # Project file dependencies
 
-$(OBJD)/c_cppstream.o: c_cppstream.cpp c_cppstream.hpp
+DEPD := $(OBJD)/dep
+DEPS := $(CXXSRC:%=$(DEPD)/%.d) $(CSRC:%=$(DEPD)/%.d)
 
-$(OBJD)/ca_unit_main.o: ca_unit_main.c ca_unit_tests.h cuw.h
-$(OBJD)/ca_unit_context.o: ca_unit_context.c ca_unit_tests.h cuw.h tb_errors.hpp
+$(DEPD)/%.d: %.cpp | $(DEPD)
+	@$(CXX) -MM -MP -MT $(OBJD)/$(basename $(<F)).o $(CXXFLAGS) $(CXXINCLUDES:%=-I %) $< > $@
+
+$(DEPD)/%.d: %.c | $(DEPD)
+	@$(CC) -MM -MP -MT $(OBJD)/$(basename $(<F)).o $(CFLAGS) $(CINCLUDES:%=-I %) $< > $@
+
+$(DEPD):
+	@mkdir -p $@
+
 $(BIND)/$(APPNAME)$(EXE): libcuw.a lib$(LIBAPP)d.a
 
 # Project files build rules
@@ -96,8 +104,12 @@ clean:
 	-@$(RM) $(BIND)/$(APPNAME).cfg
 	-@$(RM) $(BIND)/$(APPNAME)$(EXE)
 	-@$(RM) $(OBJS:%=$(OBJD)/%)
+	-@$(RM) $(DEPS)
 
 cleanall:
-	@$(RM) -r $(DIRS)
+	@$(RM) -rf $(DEPD)
+	@$(RM) -rf $(DIRS)
 
 .PHONY: all dirs clean cleanall
+
+-include $(DEPS)

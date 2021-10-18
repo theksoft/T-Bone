@@ -68,6 +68,6 @@ clean:
 	@$(MAKE) -s -f $(MKSD)/$(CAUNIT).mk clean
 
 cleanall:
-	@$(RM) -r $(BUILD)
+	@$(RM) -rf $(BUILD)
 
 .PHONY: all dirs clean cleanall

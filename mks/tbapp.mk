@@ -40,7 +40,7 @@ vpath %$(EXE) $(BIND)
 CXXSRC := ca_context ca_entry ca_tee \
 					ca_tee_connect_io ca_tee_connect_local ca_tee_connect_tcp ca_tee_connect ca_tee_settings
 OBJS := $(CXXSRC:%=%.o)
-OBJSD := $(CXXSRC:%=%-d.o)
+OBJSD := $(CXXSRC:%=%-g.o)
 
 # Compiler and linker options
 
@@ -55,18 +55,18 @@ all: dirs lib$(LIBNAME).a lib$(LIBNAME)d.a
 
 # Project file dependencies
 
-$(OBJD)/ca_context.o $(OBJD)/ca_context-d.o: ca_context.cpp ca_context.hpp ca_tee.hpp tb_ptr_vector.hxx tee_client_api.h
-$(OBJD)/ca_entry.o $(OBJD)/ca_entry-d.o: ca_entry.cpp ca_context.hpp ca_tee.hpp tb_errors.hpp tee_client_api.h
-$(OBJD)/ca_tee.o $(OBJD)/ca_tee-d.o: ca_tee.cpp ca_tee.hpp ca_tee_connect.hpp ca_tee_settings.hpp tb_settings.hpp tb_errors.hpp
-$(OBJD)/ca_tee_connect_io.o $(OBJD)/ca_tee_connect_io-d.o: ca_tee_connect_io.cpp ca_tee_connect.hpp tb_network.hxx
-$(OBJD)/ca_tee_connect_local.o $(OBJD)/ca_tee_connect_local-d.o: ca_tee_connect_local.cpp ca_tee_connect.hpp tb_network.hxx
-$(OBJD)/ca_tee_connect_tcp.o $(OBJD)/ca_tee_connect_tcp-d.o: ca_tee_connect_tcp.cpp ca_tee_connect.hpp tb_network.hxx
-$(OBJD)/ca_tee_connect.o $(OBJD)/ca_tee_connect-d.o: ca_tee_connect.cpp ca_tee_connect.hpp ca_tee_settings.hpp tb_settings.hpp tb_ptr_vector.hxx tb_network.hxx
-$(OBJD)/ca_tee_settings.o $(OBJD)/ca_tee_settings-d.o: ca_tee_settings.cpp ca_tee_settings.hpp tb_settings.hpp tb_errors.hpp
+DEPD := $(OBJD)/dep
+DEPS := $(CXXSRC:%=$(DEPD)/%.d)
+
+$(DEPD)/%.d: %.cpp | $(DEPD)
+	@$(CXX) -MM -MP -MT $(OBJD)/$(basename $(<F)).o -MT $(OBJD)/$(basename $(<F))-g.o $(CXXFLAGS) $(CXXINCLUDES:%=-I %) $< > $@
+
+$(DEPD):
+	@mkdir -p $@
 
 # Project files build rules
 
-$(OBJD)/%-d.o: %.cpp
+$(OBJD)/%-g.o: %.cpp
 	$(CXX) $(CXXFLAGS) $(CXXINCLUDES:%=-I %) -c $< -o $@
 
 $(OBJD)/%.o: %.cpp
@@ -97,8 +97,12 @@ clean:
 	-@$(RM) $(LIBD)/lib$(LIBNAME)d.a
 	-@$(RM) $(OBJS:%=$(OBJD)/%)
 	-@$(RM) $(OBJSD:%=$(OBJD)/%)
+	-@$(RM) $(DEPS)
 
 cleanall:
-	@$(RM) -r $(DIRS)
+	@$(RM) -rf $(DEPD)
+	@$(RM) -rf $(DIRS)
 
 .PHONY: all dirs clean cleanall
+
+-include $(DEPS)
