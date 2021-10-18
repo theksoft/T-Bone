@@ -17,7 +17,11 @@
 #include <cassert>
 #include <iostream>
 
-// Just get a unique 32-bit ID
+/*
+  Create a "unique" 32-bit ID within the application.
+  Use a truncated program address and not atruncated object memory address
+  in order to limit collision.
+*/
 static uint32_t getMagic() {
   return (uint32_t)(uintptr_t)getMagic;
 }
