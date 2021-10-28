@@ -37,7 +37,8 @@ vpath %$(EXE) $(BIND)
 
 # Project files
 
-CXXSRC := ts_main ts_server_app ts_server_io ts_settings
+CXXSRC := tb_messages \
+					ts_main ts_server_app ts_server_io ts_settings
 OBJS := $(CXXSRC:%=%.o)
 OBJSD := $(CXXSRC:%=%-g.o)
 

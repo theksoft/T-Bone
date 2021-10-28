@@ -6,16 +6,20 @@
 #ifndef TS_SERVER_APP_HXX
 #define TS_SERVER_APP_HXX
 
+#include "tb_messages.hpp"
 #include "tb_network.hxx"
-#include <memory>
-#include <utility>
 #include <iostream>
+#include <memory>
+#include <string>
+#include <utility>
 
 namespace tbone::server {
 
 //==============================================================================
 
-const int max_length = 1024;  // TODO Temporary for dummy reception
+extern uint32_t getClientID();
+
+//==============================================================================
 
 // S template parameter is the socket class type.
 //------------------------------------------------------------------------------
@@ -23,11 +27,51 @@ const int max_length = 1024;  // TODO Temporary for dummy reception
 template <class S>
 class AppHandler : public std::enable_shared_from_this<AppHandler<S>> {
 
+  enum { max_length = TB_WORK_SIZE };
+
 public:
-  AppHandler(S socket) : _socket(std::move(socket)) {}
+  AppHandler(S socket)
+    : _socket(std::move(socket)),
+      _remoteName(""), _remoteID(""), _localID(0)
+  {}
   virtual ~AppHandler() {}
 
-  void start() {
+  void welcome() {
+    auto self(this->shared_from_this());
+    _socket.async_read_some(
+      bstnet::buffer(_data, max_length),
+      [this, self](bstsys::error_code error, std::size_t length) {
+        if (!error && length <= max_length) {
+          // Extract all information from the string
+          MsgHello hello;
+          if (hello.parse(_data, length)) {
+
+            _remoteID = hello.getClientContextID();
+            _remoteName = hello.getClientTeeName();
+            _localID = getClientID();
+
+            MsgWelcome welcome;
+            welcome.build(_localID);
+            bstsys::error_code error;
+            bstnet::write(_socket, bstnet::buffer(welcome.getMessage()), error);
+            if (!error) {
+              process();
+            }
+          }
+        }
+        else if (error == bstnet::error::eof) {
+          std::cout << "--- connection closed!" << std::endl; // TODO To be removed
+        }
+        else {
+          throw bstsys::system_error(error); // Some other error.
+        }
+      }
+    );
+  }
+
+protected:
+
+  void process() {
     auto self(this->shared_from_this());
     // TODO Temporary dummy reception - to detect connection close
     _socket.async_read_some(
@@ -46,7 +90,9 @@ public:
 
 private:
   S _socket;
-  char _data[max_length]; // TODO Temporary for dummy reception
+  std::string _remoteName, _remoteID;
+  uint32_t _localID;
+  char _data[max_length];
 };
 
 // T template parameter is the the acceptor class type.
@@ -70,7 +116,7 @@ public:
       [this]( bstsys::error_code error, S socket) {
         if (!error) {
           std::cout << "--- connection accepted!" << std::endl; // TODO To be removed
-          std::make_shared<AppHandler<S>>(std::move(socket))->start();
+          std::make_shared<AppHandler<S>>(std::move(socket))->welcome();
         }
         accept();
       }

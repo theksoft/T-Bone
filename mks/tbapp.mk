@@ -38,7 +38,8 @@ vpath %$(EXE) $(BIND)
 # Project source file list
 
 CXXSRC := ca_context ca_entry ca_tee \
-					ca_tee_connect_io ca_tee_connect_local ca_tee_connect_tcp ca_tee_connect ca_tee_settings
+					ca_tee_connect_io ca_tee_connect_local ca_tee_connect_tcp ca_tee_connect ca_tee_settings \
+					tb_messages
 OBJS := $(CXXSRC:%=%.o)
 OBJSD := $(CXXSRC:%=%-g.o)
 

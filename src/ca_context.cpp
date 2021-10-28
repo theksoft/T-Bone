@@ -46,7 +46,7 @@ TeeContext* TeeContextMap::match(TEEC_Context *context) {
 //==============================================================================
 
 TeeContext::TeeContext(TEEC_Context *context, Tee* tee) :
-  _context(context), _tee(tee) {
+  _context(context), _tee(tee), _remoteID(0) {
   assert(_context);
   assert(_tee);
   TeeContextMap::get().add(this);
@@ -61,7 +61,8 @@ TeeContext::~TeeContext() {
 
 bool TeeContext::connect() {
   assert(_tee);
-  return _tee->connect(reinterpret_cast<Tee::Owner>(_context));
+  _remoteID = _tee->connect(reinterpret_cast<Tee::Owner>(_context));
+  return (0 != _remoteID);
 }
 
 void TeeContext::disconnect() {

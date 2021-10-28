@@ -1,6 +1,7 @@
 #include "ca_tee.hpp"
 #include "ca_tee_settings.hpp"
 #include "tb_errors.hpp"
+#include "tb_messages.hpp"
 #include <cassert>
 
 namespace tbone::client {
@@ -100,19 +101,37 @@ Tee::~Tee() {
   _name.clear();
 }
 
-bool Tee::connect(Owner owner) {
+uint32_t Tee::connect(Owner owner) {
   assert(_connector);
-  bool connected = false;
+  uint32_t remoteID = 0;
   if (_connector->connect(owner)) {
-    // TODO: Send hello and wait answer
-    connected = true;
+    std::string answer = "";
+    MsgHello hello;
+    hello.build((uintptr_t)owner, _name);
+    if (_connector->exchange(hello.getMessage(), answer)) {
+      MsgWelcome welcome;
+      if (welcome.parse(answer)) {
+        remoteID = welcome.getClientPairID();
+      }
+    }
   }
-  return connected;
+  return remoteID;
 }
 
 void Tee::disconnect(Owner owner) {
   assert(_connector);
-  // TODO: Send goodbye
+#if 0
+  // Explicit disconnection
+  std::string answer = "";
+  MsgBye bye;
+  bye.build((uintptr_t)owner, _name);
+  if (_connector->exchange(bye.getMessage(), answer)) {
+    MsgFarewell farewell;
+    if (!farewell.parse(answer)) {
+      std::cerr << TB_ERROR_DISCONNECTION << bye.getMessage() << std::endl;
+    }
+  }
+#endif
   _connector->disconnect(owner);
 }
 

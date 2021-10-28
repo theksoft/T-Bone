@@ -4,6 +4,13 @@ namespace tbone::server {
 
 //==============================================================================
 
+uint32_t getClientID() {
+  static uint32_t count = 0;
+  return ++count;
+}
+
+//==============================================================================
+
 template
 class AppServer<
   bstlocal::stream_protocol::socket,

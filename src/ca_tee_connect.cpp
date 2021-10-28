@@ -94,6 +94,12 @@ void TeeConnector::close() {
   _connection = NULL;
 }
 
+bool TeeConnector::exchange(const std::string& greeting, std::string& answer) {
+  if (_connection) {
+    return _connection->exchange(greeting, answer);
+  }
+  return false;
+}
 
 //==============================================================================
 

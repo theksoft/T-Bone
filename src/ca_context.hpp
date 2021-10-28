@@ -49,6 +49,7 @@ public:
 private:
   TEEC_Context* _context;
   Tee*  _tee;
+  uint32_t _remoteID;
 
   friend bool operator== (const TeeContext& lhs, const TEEC_Context* rhs);
 };

@@ -1,6 +1,7 @@
 #ifndef CA_TEE_CONNECT_HPP
 #define CA_TEE_CONNECT_HPP
 
+#include "ca_tee_connect.hxx"
 #include "ca_tee_settings.hpp"
 #include "tb_network.hxx"
 #include "tb_ptr_vector.hxx"
@@ -10,13 +11,10 @@ namespace tbone::client {
 //==============================================================================
 
 class TeeIOContext;
-class TeeConnection;
-class TeeLocalConnection;
-class TeeTcpConnection;
 class TeeConnector;
 class TeeConnectorList;
 
-//------------------------------------------------------------------------------
+//==============================================================================
 
 // Singleton
 class TeeIOContext {
@@ -46,34 +44,6 @@ private:
 
 //------------------------------------------------------------------------------
 
-class TeeConnection {
-public:
-  TeeConnection() {}
-  virtual ~TeeConnection() {}
-};
-
-//------------------------------------------------------------------------------
-
-class TeeLocalConnection : public TeeConnection {
-public:
-  TeeLocalConnection(const std::string address);
-  virtual ~TeeLocalConnection();
-private:
-  bstlocal::stream_protocol::socket *_socket;
-};
-
-//------------------------------------------------------------------------------
-
-class TeeTcpConnection : public TeeConnection {
-public:
-  TeeTcpConnection(const std::string address, int port);
-  virtual ~TeeTcpConnection();
-private:
-  bstip::tcp::socket *_socket;
-};
-
-//------------------------------------------------------------------------------
-
 class TeeConnector {
 
 public:
@@ -95,6 +65,7 @@ public:
   void disconnect(Owner owner);
   bool open();
   void close();
+  bool exchange(const std::string& greeting, std::string& answer);
 
   static TeeConnector* create(const TeeSettings& settings);
   

@@ -45,7 +45,7 @@ public:
   const std::string& getName() { return _name; }
 
   typedef const void *Owner;
-  bool connect(Owner owner);
+  uint32_t connect(Owner owner);
   void disconnect(Owner owner);
 
 private:
