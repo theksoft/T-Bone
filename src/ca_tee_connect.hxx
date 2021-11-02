@@ -40,13 +40,20 @@ public:
   }
 
   virtual bool exchange(const std::string& request, std::string& acknowledge) {
-    bstsys::error_code error;
-    bstnet::write(*_socket, bstnet::buffer(request), error);
-    if (!error) {
-      size_t length = _socket->read_some(bstnet::buffer(_data, max_length), error);
-      if(!error|| bstnet::error::eof == error) {
-        acknowledge.assign(_data, length);
-        return true;
+    TBMessage m;
+    if (m.generateFrom(request)) {
+      bstsys::error_code error;
+      bstnet::write(*_socket, bstnet::buffer(m.getMessage(), m.getSize()), error);
+      if (!error) {
+        size_t length = _socket->read_some(bstnet::buffer(_data, max_length), error);
+        if(!error|| bstnet::error::eof == error) {
+          m.clear();
+          if (0 == m.prepare(_data, length) && !m.hasError()) {
+            if (m.assignTo(acknowledge)) {
+              return true;
+            }
+          }
+        }
       }
     }
     return false;

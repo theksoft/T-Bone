@@ -106,11 +106,11 @@ uint32_t Tee::connect(Owner owner) {
   uint32_t remoteID = 0;
   if (_connector->connect(owner)) {
     std::string answer = "";
-    MsgHello hello;
+    TBMessageHello hello;
     hello.build((uintptr_t)owner, _name);
     if (_connector->exchange(hello.getMessage(), answer)) {
-      MsgWelcome welcome;
-      if (welcome.parse(answer)) {
+      TBMessageWelcome welcome(answer);
+      if (welcome.parse()) {
         remoteID = welcome.getClientPairID();
       }
     }
@@ -121,15 +121,20 @@ uint32_t Tee::connect(Owner owner) {
 void Tee::disconnect(Owner owner) {
   assert(_connector);
 #if 0
+  bool error = true;
   // Explicit disconnection
   std::string answer = "";
-  MsgBye bye;
+  TBMessageBye bye;
+  TBMessageFarewell farewell;
   bye.build((uintptr_t)owner, _name);
   if (_connector->exchange(bye.getMessage(), answer)) {
-    MsgFarewell farewell;
-    if (!farewell.parse(answer)) {
-      std::cerr << TB_ERROR_DISCONNECTION << bye.getMessage() << std::endl;
+    if (farewell.parse(answer)) {
+      error = false;
     }
+  }
+  if (error) {
+    std::string& msg = (farewell.length()) ? farewell : bye;
+    std::cerr << TB_ERROR_DISCONNECTION << msg.getMessage() << std::endl;
   }
 #endif
   _connector->disconnect(owner);

@@ -32,37 +32,45 @@ class AppHandler : public std::enable_shared_from_this<AppHandler<S>> {
 public:
   AppHandler(S socket)
     : _socket(std::move(socket)),
-      _remoteName(""), _remoteID(""), _localID(0)
+//      _remoteName(""), _remoteID(""), _localID(0),
+      _rInProgress(false)
   {}
   virtual ~AppHandler() {}
 
-  void welcome() {
+  void handle() {
     auto self(this->shared_from_this());
     _socket.async_read_some(
-      bstnet::buffer(_data, max_length),
+      bstnet::buffer(_rData, max_length),
       [this, self](bstsys::error_code error, std::size_t length) {
-        if (!error && length <= max_length) {
-          // Extract all information from the string
-          MsgHello hello;
-          if (hello.parse(_data, length)) {
-
-            _remoteID = hello.getClientContextID();
-            _remoteName = hello.getClientTeeName();
-            _localID = getClientID();
-
-            MsgWelcome welcome;
-            welcome.build(_localID);
-            bstsys::error_code error;
-            bstnet::write(_socket, bstnet::buffer(welcome.getMessage()), error);
-            if (!error) {
-              process();
-            }
+        if (!error) {
+          // Manage reception
+          if (!_rInProgress) {
+            _rMessage.clear();
+            _rMessage.prepare(_rData, length);
+          } else {
+            _rMessage.append(_rData, length);
           }
-        }
-        else if (error == bstnet::error::eof) {
-          std::cout << "--- connection closed!" << std::endl; // TODO To be removed
-        }
-        else {
+          _rInProgress = true;
+          // Process reception if complete
+          if (!_rMessage.hasError()) {
+            if (_rMessage.isComplete()) {
+              _rInProgress = false;
+              TBMessage m(std::move(_rMessage));
+              process(m);
+            }
+          } else {
+            _rMessage.clear();
+            _rInProgress = false;
+            // TODO Replace both with log
+            std::cerr << "--- ERROR data reception" << std::endl;
+          }
+          // Next reception
+          handle();
+        } else if (error == bstnet::error::eof) {
+          // TODO Replace with log
+          std::cout << "--- Connection closed!" << std::endl;
+        } else if (error) {
+          // TODO Replace with log
           throw bstsys::system_error(error); // Some other error.
         }
       }
@@ -71,28 +79,72 @@ public:
 
 protected:
 
-  void process() {
-    auto self(this->shared_from_this());
-    // TODO Temporary dummy reception - to detect connection close
-    _socket.async_read_some(
-      bstnet::buffer(_data, max_length),
-      [this, self](bstsys::error_code error, std::size_t length) {
-        (void)length;
-        if (error == bstnet::error::eof) {
-          std::cout << "--- connection closed!" << std::endl; // TODO To be removed
-        }
-        else if (error) {
-          throw bstsys::system_error(error); // Some other error.
-        }
+  void process(TBMessage& message) {
+    std::string s;
+    switch (message.getType()) {
+    case TBMessage::COMMAND:
+    case TBMessage::OPEN:
+    case TBMessage::CLOSE:
+      std::cerr << "--- UNSUPPORTED MESSAGE RECEIVED!" << std::endl;
+      break;
+    case TBMessage::HELLO:
+      message.assignTo(s);
+      welcome(s);
+      break;
+    case TBMessage::BYE:
+      message.assignTo(s);
+      farewell(s);
+      break;
+    case TBMessage::WELCOME:
+    case TBMessage::FAREWELL:
+      // TODO Replace with log
+      std::cerr << "--- UNEXPECTED MESSAGE RECEIVED!" << std::endl;
+      break;
+    case TBMessage::UNKNOWN:
+    default:
+      // TODO Replace with log
+      std::cerr << "--- UNKNOWN MESSAGE RECEIVED!" << std::endl;
+      break;
+    }
+  }
+
+  void welcome(std::string& str) {
+    TBMessageHello hello(str);
+    if (hello.parse()) {
+      uint32_t id = getClientID();
+#if 0
+      _remoteID = hello.getClientContextID();
+      _remoteName = hello.getClientTeeName();
+      _localID = getClientID();
+#endif
+      TBMessageWelcome welcome;
+      welcome.build(id);
+      TBMessage msg;
+      msg.generateFrom(welcome.getMessage());
+      bstsys::error_code error;
+      bstnet::write(_socket, bstnet::buffer(msg.getMessage(), msg.getSize()), error);
+      if (error) {
+      // TODO Replace with log
+        std::cerr << "--- ERROR Sending welcome message failed!" << std::endl;
       }
-    );
+    }
+  }
+
+  void farewell(std::string& str) {
+    (void)str;
   }
 
 private:
   S _socket;
+
+#if 0
   std::string _remoteName, _remoteID;
   uint32_t _localID;
-  char _data[max_length];
+#endif
+
+  bool _rInProgress;
+  TBMessage _rMessage;
+  char _rData[max_length];
 };
 
 // T template parameter is the the acceptor class type.
@@ -116,7 +168,7 @@ public:
       [this]( bstsys::error_code error, S socket) {
         if (!error) {
           std::cout << "--- connection accepted!" << std::endl; // TODO To be removed
-          std::make_shared<AppHandler<S>>(std::move(socket))->welcome();
+          std::make_shared<AppHandler<S>>(std::move(socket))->handle();
         }
         accept();
       }

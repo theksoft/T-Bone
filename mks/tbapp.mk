@@ -39,7 +39,7 @@ vpath %$(EXE) $(BIND)
 
 CXXSRC := ca_context ca_entry ca_tee \
 					ca_tee_connect_io ca_tee_connect_local ca_tee_connect_tcp ca_tee_connect ca_tee_settings \
-					tb_messages
+					tb_messages tb_messages_string_ack tb_messages_string_req
 OBJS := $(CXXSRC:%=%.o)
 OBJSD := $(CXXSRC:%=%-g.o)
 
