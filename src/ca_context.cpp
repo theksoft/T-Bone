@@ -70,11 +70,11 @@ void TeeContext::disconnect() {
   _tee->disconnect(reinterpret_cast<Tee::Owner>(_context));
 }
 
-bool TeeContext::hasSessions() {
+bool TeeContext::hasSessions() const {
   return false;
 }
 
-bool TeeContext::hasSharedMemoryBlocks() {
+bool TeeContext::hasSharedMemoryBlocks() const {
   return false;
 }
 

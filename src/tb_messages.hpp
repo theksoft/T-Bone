@@ -132,6 +132,8 @@ public:
   virtual void clear();
   bool build(uintptr_t id, std::string& name);
   bool parse();
+  const std::string& getClientContextID() const { return _id; }
+  const std::string& getClientTeeName() const   { return _name; }
 private:
   std::string _id, _name;
 protected:

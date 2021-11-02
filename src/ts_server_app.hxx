@@ -8,6 +8,7 @@
 
 #include "tb_messages.hpp"
 #include "tb_network.hxx"
+#include "ts_context.hpp"
 #include <iostream>
 #include <memory>
 #include <string>
@@ -112,23 +113,23 @@ protected:
     TBMessageHello hello(str);
     if (hello.parse()) {
       uint32_t id = getClientID();
-#if 0
-      _remoteID = hello.getClientContextID();
-      _remoteName = hello.getClientTeeName();
-      _localID = getClientID();
-#endif
-      TBMessageWelcome welcome;
-      welcome.build(id);
-      TBMessage msg;
-      msg.generateFrom(welcome.getMessage());
-      bsys::error_code error;
-      bio::write(_socket, bio::buffer(msg.getMessage(), msg.getSize()), error);
-      if (!error) {
-        // TODO Replace with log
-        std::cout << "------ TEE context created #" << id << std::endl;
+      if(NULL != _contexts.add(id, hello.getClientContextID(), hello.getClientTeeName())) {
+        TBMessageWelcome welcome;
+        welcome.build(id);
+        TBMessage msg;
+        msg.generateFrom(welcome.getMessage());
+        bsys::error_code error;
+        bio::write(_socket, bio::buffer(msg.getMessage(), msg.getSize()), error);
+        if (!error) {
+          // TODO Replace with log
+          std::cout << "------ TEE context created #" << id << std::endl;
+        } else {
+          // TODO Replace with log
+          std::cerr << "--- ERROR Sending welcome message failed!" << std::endl;
+        }
       } else {
-        // TODO Replace with log
-        std::cerr << "--- ERROR Sending welcome message failed!" << std::endl;
+          // TODO Replace with log
+          std::cerr << "--- ERROR Client context already present!" << std::endl;
       }
     }
   }
@@ -136,20 +137,24 @@ protected:
   void farewell(std::string& str) {
     TBMessageBye bye(str);
     if (bye.parse()) {
-      // TODO remove context and retrive id
-      uint32_t id = 42;
-      TBMessageFarewell farewell;
-      farewell.build(id); // 42 to be replaced by id
-      TBMessage msg;
-      msg.generateFrom(farewell.getMessage());
-      bsys::error_code error;
-      bio::write(_socket, bio::buffer(msg.getMessage(), msg.getSize()), error);
-      if (!error) {
-        // TODO Replace with log
-        std::cout << "------ TEE context remove #" << id << std::endl;
+      uint32_t id = _contexts.remove(bye.getClientContextID());
+      if (id) {
+        TBMessageFarewell farewell;
+        farewell.build(id); // 42 to be replaced by id
+        TBMessage msg;
+        msg.generateFrom(farewell.getMessage());
+        bsys::error_code error;
+        bio::write(_socket, bio::buffer(msg.getMessage(), msg.getSize()), error);
+        if (!error) {
+          // TODO Replace with log
+          std::cout << "------ TEE context remove #" << id << std::endl;
+        } else {
+          // TODO Replace with log
+          std::cerr << "--- ERROR Sending farewell message failed!" << std::endl;
+        }
       } else {
         // TODO Replace with log
-        std::cerr << "--- ERROR Sending farewell message failed!" << std::endl;
+        std::cerr << "--- ERROR Client context cannot be removed!" << std::endl;
       }
     }
   }
@@ -157,14 +162,11 @@ protected:
 private:
   S _socket;
 
-#if 0
-  std::string _remoteName, _remoteID;
-  uint32_t _localID;
-#endif
-
   bool _rInProgress;
   TBMessage _rMessage;
   char _rData[max_length];
+
+  ContextMap _contexts;
 };
 
 // T template parameter is the the acceptor class type.
