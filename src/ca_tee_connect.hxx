@@ -42,11 +42,11 @@ public:
   virtual bool exchange(const std::string& request, std::string& acknowledge) {
     TBMessage m;
     if (m.generateFrom(request)) {
-      bstsys::error_code error;
-      bstnet::write(*_socket, bstnet::buffer(m.getMessage(), m.getSize()), error);
+      bsys::error_code error;
+      bio::write(*_socket, bio::buffer(m.getMessage(), m.getSize()), error);
       if (!error) {
-        size_t length = _socket->read_some(bstnet::buffer(_data, max_length), error);
-        if(!error|| bstnet::error::eof == error) {
+        size_t length = _socket->read_some(bio::buffer(_data, max_length), error);
+        if(!error|| bio::error::eof == error) {
           m.clear();
           if (0 == m.prepare(_data, length) && !m.hasError()) {
             if (m.assignTo(acknowledge)) {
@@ -68,8 +68,7 @@ protected:
 // Actual specialized connection class
 //==============================================================================
 
-class TeeLocalConnection
-  : public TTeeConnection<bstlocal::stream_protocol::socket> {
+class TeeLocalConnection : public TTeeConnection<LocalSocket> {
 public:
   TeeLocalConnection(const std::string address);
   virtual ~TeeLocalConnection();
@@ -77,8 +76,7 @@ public:
 
 //------------------------------------------------------------------------------
 
-class TeeTcpConnection
-  : public TTeeConnection<bstip::tcp::socket> {
+class TeeTcpConnection : public TTeeConnection<TcpSocket> {
 public:
   TeeTcpConnection(const std::string address, int port);
   virtual ~TeeTcpConnection();

@@ -27,9 +27,9 @@ private:
   TeeIOContext() {}
   ~TeeIOContext() { _theIOContext = NULL; }  // Not intended to be called
 public:
-  bstnet::io_context& getIOContext()  { return _ioContext; }
+  IOContext& getIOContext()  { return _ioContext; }
 private:
-  bstnet::io_context _ioContext;
+  IOContext _ioContext;
 
   /*
    * Singleton management

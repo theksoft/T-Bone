@@ -40,8 +40,8 @@ public:
   void handle() {
     auto self(this->shared_from_this());
     _socket.async_read_some(
-      bstnet::buffer(_rData, max_length),
-      [this, self](bstsys::error_code error, std::size_t length) {
+      bio::buffer(_rData, max_length),
+      [this, self](bsys::error_code error, std::size_t length) {
         if (!error) {
           // Manage reception
           if (!_rInProgress) {
@@ -66,12 +66,12 @@ public:
           }
           // Next reception
           handle();
-        } else if (error == bstnet::error::eof) {
+        } else if (error == bio::error::eof) {
           // TODO Replace with log
           std::cout << "--- Connection closed!" << std::endl;
         } else if (error) {
           // TODO Replace with log
-          throw bstsys::system_error(error); // Some other error.
+          std::cerr << "--- ERROR Connection issue! " << error.message() << std::endl;
         }
       }
     );
@@ -121,8 +121,8 @@ protected:
       welcome.build(id);
       TBMessage msg;
       msg.generateFrom(welcome.getMessage());
-      bstsys::error_code error;
-      bstnet::write(_socket, bstnet::buffer(msg.getMessage(), msg.getSize()), error);
+      bsys::error_code error;
+      bio::write(_socket, bio::buffer(msg.getMessage(), msg.getSize()), error);
       if (!error) {
         // TODO Replace with log
         std::cout << "------ TEE context created #" << id << std::endl;
@@ -142,8 +142,8 @@ protected:
       farewell.build(id); // 42 to be replaced by id
       TBMessage msg;
       msg.generateFrom(farewell.getMessage());
-      bstsys::error_code error;
-      bstnet::write(_socket, bstnet::buffer(msg.getMessage(), msg.getSize()), error);
+      bsys::error_code error;
+      bio::write(_socket, bio::buffer(msg.getMessage(), msg.getSize()), error);
       if (!error) {
         // TODO Replace with log
         std::cout << "------ TEE context remove #" << id << std::endl;
@@ -175,7 +175,7 @@ private:
 template <class S, class T>
 class AppServer {
 public:
-  AppServer(bstnet::io_context& ioContext, const typename T::endpoint_type& endpoint)
+  AppServer(IOContext& ioContext, const typename T::endpoint_type& endpoint)
     : _acceptor(ioContext, endpoint)
   {
     accept();
@@ -185,7 +185,7 @@ public:
 
   void accept() {
     _acceptor.async_accept(
-      [this]( bstsys::error_code error, S socket) {
+      [this]( bsys::error_code error, S socket) {
         if (!error) {
           std::cout << "--- connection accepted!" << std::endl; // TODO To be removed
           std::make_shared<AppHandler<S>>(std::move(socket))->handle();
@@ -203,27 +203,11 @@ private:
 // Explicit instanciation references
 //==============================================================================
 
-extern template
-class AppServer<
-  bstlocal::stream_protocol::socket,
-  bstlocal::stream_protocol::acceptor
->;
+extern template class AppServer<LocalSocket,LocalAcceptor>;
+extern template class AppServer<TcpSocket, TcpAcceptor>;
 
-extern template 
-class AppServer<
-  bstip::tcp::socket,
-  bstip::tcp::acceptor
->;
-
-typedef AppServer<
-  bstlocal::stream_protocol::socket,
-  bstlocal::stream_protocol::acceptor
-> AppLocalServer;
-
-typedef AppServer<
-  bstip::tcp::socket,
-  bstip::tcp::acceptor
-> AppTcpServer;
+typedef AppServer<LocalSocket, LocalAcceptor> AppLocalServer;
+typedef AppServer<TcpSocket, TcpAcceptor> AppTcpServer;
 
 //==============================================================================
 

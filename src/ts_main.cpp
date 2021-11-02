@@ -89,6 +89,7 @@ private:
 
 int main(int argc, char* argv[])
 {
+  using namespace tbone;
   using namespace tbone::server;
 
   Options opt(argc, argv);
@@ -115,7 +116,7 @@ int main(int argc, char* argv[])
       ::unlink(file.c_str());
       als = new AppLocalServer(
         TeeIOContext::get()->getIOContext(),
-        bstlocal::stream_protocol::endpoint(file)
+        LocalEndPoint(file)
       );
       oneOfAppServiceSet = true;
     }
@@ -124,7 +125,7 @@ int main(int argc, char* argv[])
     if (0 != port) {
       ats = new AppTcpServer(
         TeeIOContext::get()->getIOContext(),
-        bstip::tcp::endpoint(bstip::tcp::v4(), port)
+        TcpEndPoint(bip::tcp::v4(), port)
       );
       oneOfAppServiceSet = true;
     }

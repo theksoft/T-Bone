@@ -11,17 +11,8 @@ uint32_t getClientID() {
 
 //==============================================================================
 
-template
-class AppServer<
-  bstlocal::stream_protocol::socket,
-  bstlocal::stream_protocol::acceptor
->;
-
-template 
-class AppServer<
-  bstip::tcp::socket,
-  bstip::tcp::acceptor
->;
+template class AppServer<LocalSocket, LocalAcceptor>;
+template class AppServer<TcpSocket, TcpAcceptor>;
 
 //==============================================================================
 

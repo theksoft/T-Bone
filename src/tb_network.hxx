@@ -5,10 +5,27 @@
 
 #include <boost/asio.hpp>
 
-namespace bstnet = boost::asio;
-namespace bstip = boost::asio::ip;
-namespace bstlocal = boost::asio::local;
-namespace bstsys = boost::system;
+namespace bio     = boost::asio;
+namespace bip     = boost::asio::ip;
+namespace blocal  = boost::asio::local;
+namespace bsys    = boost::system;
+
+//==============================================================================
+
+namespace tbone {
+
+  typedef bio::io_context                     IOContext;
+  typedef bio::signal_set                     SignalSet;
+
+  typedef blocal::stream_protocol::socket     LocalSocket;
+  typedef blocal::stream_protocol::acceptor   LocalAcceptor;
+  typedef blocal::stream_protocol::endpoint   LocalEndPoint;
+
+  typedef bip::tcp::socket                    TcpSocket;
+  typedef bip::tcp::acceptor                  TcpAcceptor;
+  typedef bip::tcp::endpoint                  TcpEndPoint;
+
+}
 
 //==============================================================================
 

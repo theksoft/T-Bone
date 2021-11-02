@@ -73,7 +73,7 @@ bool TeeConnector::open() {
     if (LOCAL == _domain) _connection = new TeeLocalConnection(_address);
     else                  _connection = new TeeTcpConnection(_address, _port);
 
-  } catch (bstsys::system_error &e) {
+  } catch (bsys::system_error &e) {
     std::cerr << TEEC_ERROR_CONNECTION << _address;
     if (TCP == _domain) {
       std::cerr <<  ":" << std::dec << _port;

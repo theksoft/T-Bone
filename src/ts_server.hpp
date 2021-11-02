@@ -23,10 +23,10 @@ private:
   TeeIOContext();
   ~TeeIOContext();
 public:
-  bstnet::io_context& getIOContext()  { return _ioContext; }
+  IOContext& getIOContext()  { return _ioContext; }
 private:
-  bstnet::io_context _ioContext;
-  bstnet::signal_set _signals;
+  IOContext _ioContext;
+  SignalSet _signals;
 
   /*
    * Singleton management
