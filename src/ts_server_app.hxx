@@ -123,15 +123,35 @@ protected:
       msg.generateFrom(welcome.getMessage());
       bstsys::error_code error;
       bstnet::write(_socket, bstnet::buffer(msg.getMessage(), msg.getSize()), error);
-      if (error) {
-      // TODO Replace with log
+      if (!error) {
+        // TODO Replace with log
+        std::cout << "------ TEE context created #" << id << std::endl;
+      } else {
+        // TODO Replace with log
         std::cerr << "--- ERROR Sending welcome message failed!" << std::endl;
       }
     }
   }
 
   void farewell(std::string& str) {
-    (void)str;
+    TBMessageBye bye(str);
+    if (bye.parse()) {
+      // TODO remove context and retrive id
+      uint32_t id = 42;
+      TBMessageFarewell farewell;
+      farewell.build(id); // 42 to be replaced by id
+      TBMessage msg;
+      msg.generateFrom(farewell.getMessage());
+      bstsys::error_code error;
+      bstnet::write(_socket, bstnet::buffer(msg.getMessage(), msg.getSize()), error);
+      if (!error) {
+        // TODO Replace with log
+        std::cout << "------ TEE context remove #" << id << std::endl;
+      } else {
+        // TODO Replace with log
+        std::cerr << "--- ERROR Sending farewell message failed!" << std::endl;
+      }
+    }
   }
 
 private:

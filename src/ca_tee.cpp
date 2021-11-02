@@ -120,23 +120,21 @@ uint32_t Tee::connect(Owner owner) {
 
 void Tee::disconnect(Owner owner) {
   assert(_connector);
-#if 0
   bool error = true;
   // Explicit disconnection
   std::string answer = "";
   TBMessageBye bye;
-  TBMessageFarewell farewell;
   bye.build((uintptr_t)owner, _name);
   if (_connector->exchange(bye.getMessage(), answer)) {
-    if (farewell.parse(answer)) {
+    TBMessageFarewell farewell(answer);
+    if (farewell.parse()) {
       error = false;
     }
   }
   if (error) {
-    std::string& msg = (farewell.length()) ? farewell : bye;
-    std::cerr << TB_ERROR_DISCONNECTION << msg.getMessage() << std::endl;
+    const std::string& msg = (answer.length()) ? answer : bye.getMessage();
+    std::cerr << TB_ERROR_DISCONNECTION << msg << std::endl;
   }
-#endif
   _connector->disconnect(owner);
 }
 

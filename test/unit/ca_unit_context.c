@@ -21,6 +21,7 @@ static void finalizeBadContext(void);
 static void finalizeUninitializedContext(void);
 
 static void initialize2finalizeContext(void);
+static void initialize2finalizeMultiContext(void);
 static void initializeInexistentLocalCon(void);
 static void initializeInexistentTcpCon(void);
 
@@ -36,6 +37,7 @@ static tCuwTest tests[] = {
   { "Initialize managed TEE context", initializeManagedContext },
   { "Initialize using inexistent local connection", initializeInexistentLocalCon },
   { "Initialize using inexistent tcp connection", initializeInexistentTcpCon },
+  { "Initialize & finalize multiple TEE context", initialize2finalizeMultiContext },
   { NULL, NULL }  // End of test table
 };
 
@@ -126,6 +128,30 @@ static void initialize2finalizeContext(void) {
     // Redo => Check availability
     CU_ASSERT(TEEC_SUCCESS == TEEC_InitializeContext("TEE", &c));
     TEEC_FinalizeContext(&c);
+  }
+}
+
+static void initialize2finalizeMultiContext(void) {
+  // Check multiple initialization & finalization from same app
+  #define TEEC_CONTEXT_MULTI_INIT 4
+  TEEC_Context c[TEEC_CONTEXT_MULTI_INIT];
+  TEEC_Result r[TEEC_CONTEXT_MULTI_INIT];
+  int i;
+  // Open
+  for (i = 0; i < TEEC_CONTEXT_MULTI_INIT; i++) {
+    CU_ASSERT(TEEC_SUCCESS == (r[i] = TEEC_InitializeContext(NULL, &c[i])));
+  }
+  // Close even
+  for (i = 0; i < TEEC_CONTEXT_MULTI_INIT; i += 2) {
+    if (TEEC_SUCCESS == r[i]) {
+      TEEC_FinalizeContext(&c[i]);
+    }
+  }
+  // Close odd
+  for (i = 1; i < TEEC_CONTEXT_MULTI_INIT; i += 2) {
+    if (TEEC_SUCCESS == r[i]) {
+      TEEC_FinalizeContext(&c[i]);
+    }
   }
 }
 
