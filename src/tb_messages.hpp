@@ -21,6 +21,7 @@
 #define TB_MSG_OPEN         "OPEN#"
 #define TB_MSG_CLOSE        "CLOSE#"
 #define TB_MSG_COMMAND      "COMMAND#"
+#define TB_MSG_REJECTED     "REJECTED#"
 
 namespace tbone {
 
@@ -62,7 +63,8 @@ public:
     UNKNOWN,
     HELLO, WELCOME,
     BYE, FAREWELL,
-    OPEN, CLOSE, COMMAND
+    OPEN, CLOSE, COMMAND,
+    REJECTED
   } Type;
 
   TBMessage() : _error(true), _size(0), _message(NULL), _current(NULL) {}
@@ -187,6 +189,14 @@ class TBMessageFarewell : public TBMessageAcknowledge {
 public:
   TBMessageFarewell() : TBMessageAcknowledge(TB_MSG_FAREWELL) {}
   TBMessageFarewell(std::string& str) : TBMessageAcknowledge(TB_MSG_FAREWELL, str) {}
+};
+
+//==============================================================================
+
+class TBMessageRejected : public TBMessageAcknowledge {
+public:
+  TBMessageRejected() : TBMessageAcknowledge(TB_MSG_REJECTED) {}
+  TBMessageRejected(std::string& str) : TBMessageAcknowledge(TB_MSG_REJECTED, str) {}
 };
 
 //==============================================================================

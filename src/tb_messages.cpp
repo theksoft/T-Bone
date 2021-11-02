@@ -11,14 +11,15 @@ struct sTBMessageHeader {
   TBMessage::Type type;
   const char *banner;
 } TBMessageHeaders[] = {
-  { TBMessage::COMMAND,  TB_MSG_COMMAND },
-  { TBMessage::OPEN,     TB_MSG_OPEN },
-  { TBMessage::CLOSE,    TB_MSG_CLOSE },
-  { TBMessage::HELLO,    TB_MSG_HELLO },
-  { TBMessage::WELCOME,  TB_MSG_WELCOME },
-  { TBMessage::BYE,      TB_MSG_BYE },
-  { TBMessage::FAREWELL, TB_MSG_FAREWELL },
-  { TBMessage::UNKNOWN,  NULL }
+  { TBMessage::COMMAND,   TB_MSG_COMMAND },
+  { TBMessage::OPEN,      TB_MSG_OPEN },
+  { TBMessage::CLOSE,     TB_MSG_CLOSE },
+  { TBMessage::HELLO,     TB_MSG_HELLO },
+  { TBMessage::WELCOME,   TB_MSG_WELCOME },
+  { TBMessage::BYE,       TB_MSG_BYE },
+  { TBMessage::FAREWELL,  TB_MSG_FAREWELL },
+  { TBMessage::REJECTED,  TB_MSG_REJECTED },
+  { TBMessage::UNKNOWN,   NULL }
 };
 
 //==============================================================================

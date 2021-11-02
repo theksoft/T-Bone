@@ -128,8 +128,14 @@ protected:
           std::cerr << "--- ERROR Sending welcome message failed!" << std::endl;
         }
       } else {
-          // TODO Replace with log
-          std::cerr << "--- ERROR Client context already present!" << std::endl;
+        TBMessageRejected rejected;
+        rejected.build(id);
+        TBMessage msg;
+        msg.generateFrom(rejected.getMessage());
+        // Don't care about error management!
+        bio::write(_socket, bio::buffer(msg.getMessage(), msg.getSize()));
+        // TODO Replace with log
+        std::cerr << "--- ERROR Client context already present!" << std::endl;
       }
     }
   }
@@ -140,7 +146,7 @@ protected:
       uint32_t id = _contexts.remove(bye.getClientContextID());
       if (id) {
         TBMessageFarewell farewell;
-        farewell.build(id); // 42 to be replaced by id
+        farewell.build(id);
         TBMessage msg;
         msg.generateFrom(farewell.getMessage());
         bsys::error_code error;
@@ -153,6 +159,12 @@ protected:
           std::cerr << "--- ERROR Sending farewell message failed!" << std::endl;
         }
       } else {
+        TBMessageRejected rejected;
+        rejected.build(id);
+        TBMessage msg;
+        msg.generateFrom(rejected.getMessage());
+        // Don't care about error management!
+        bio::write(_socket, bio::buffer(msg.getMessage(), msg.getSize()));
         // TODO Replace with log
         std::cerr << "--- ERROR Client context cannot be removed!" << std::endl;
       }
