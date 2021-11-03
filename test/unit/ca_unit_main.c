@@ -8,10 +8,10 @@
  * Test suites
  * -------------------------------------------------------------------------- */
 
-#include "ac_unit_tests.h"
+#include "ca_unit_tests.h"
 
 static tCuwSuiteGetter testSuites[] = {
-  getACUnitContextSuite,
+  getCAUnitContextSuite,
   CUW_SUITE_END     // End of test suite
 };
 

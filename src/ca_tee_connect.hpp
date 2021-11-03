@@ -1,27 +1,20 @@
-#ifndef AC_TEE_CONNECT_HPP
-#define AC_TEE_CONNECT_HPP
+#ifndef CA_TEE_CONNECT_HPP
+#define CA_TEE_CONNECT_HPP
 
-#include "ac_tee_settings.hpp"
+#include "ca_tee_connect.hxx"
+#include "ca_tee_settings.hpp"
+#include "tb_network.hxx"
 #include "tb_ptr_vector.hxx"
-#include <boost/asio.hpp>
 
 namespace tbone::client {
 
 //==============================================================================
 
 class TeeIOContext;
-class TeeConnection;
-class TeeLocalConnection;
-class TeeTcpConnection;
 class TeeConnector;
 class TeeConnectorList;
 
-namespace bstnet = boost::asio;
-namespace bstip = boost::asio::ip;
-namespace bstlocal = boost::asio::local;
-namespace bstsys = boost::system;
-
-//------------------------------------------------------------------------------
+//==============================================================================
 
 // Singleton
 class TeeIOContext {
@@ -34,9 +27,9 @@ private:
   TeeIOContext() {}
   ~TeeIOContext() { _theIOContext = NULL; }  // Not intended to be called
 public:
-  bstnet::io_context& getIOContext()  { return _ioContext; }
+  IOContext& getIOContext()  { return _ioContext; }
 private:
-  bstnet::io_context _ioContext;
+  IOContext _ioContext;
 
   /*
    * Singleton management
@@ -47,34 +40,6 @@ public:
 private:
   static TeeIOContext *_theIOContext;
 
-};
-
-//------------------------------------------------------------------------------
-
-class TeeConnection {
-public:
-  TeeConnection() {}
-  virtual ~TeeConnection() {}
-};
-
-//------------------------------------------------------------------------------
-
-class TeeLocalConnection : public TeeConnection {
-public:
-  TeeLocalConnection(const std::string address);
-  virtual ~TeeLocalConnection();
-private:
-  bstlocal::stream_protocol::socket *_socket;
-};
-
-//------------------------------------------------------------------------------
-
-class TeeTcpConnection : public TeeConnection {
-public:
-  TeeTcpConnection(const std::string address, int port);
-  virtual ~TeeTcpConnection();
-private:
-  bstip::tcp::socket *_socket;
 };
 
 //------------------------------------------------------------------------------
@@ -100,6 +65,7 @@ public:
   void disconnect(Owner owner);
   bool open();
   void close();
+  bool exchange(const std::string& greeting, std::string& answer);
 
   static TeeConnector* create(const TeeSettings& settings);
   
@@ -133,6 +99,6 @@ public:
 
 }   // namespace tbone::client
 
-#endif  // AC_TEE_CONNECT_HPP
+#endif  // CA_TEE_CONNECT_HPP
 
 // EOF

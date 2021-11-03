@@ -27,6 +27,7 @@ DIRS := $(IMPD) $(OBJD) $(LIBD) $(BIND)
 # Project source path
 
 vpath %.h $(INCD):$(SRCD)
+vpath %.hxx $(INCD):$(SRCD)
 vpath %.hpp $(INCD):$(SRCD)
 vpath %.cpp $(SRCD)
 vpath %.c $(SRCD)
@@ -36,9 +37,10 @@ vpath %$(EXE) $(BIND)
 
 # Project files
 
-CXXSRC := ts_main
+CXXSRC := tb_messages tb_messages_string_ack tb_messages_string_req \
+					ts_context ts_main ts_server_app ts_server_io ts_settings
 OBJS := $(CXXSRC:%=%.o)
-OBJSD := $(CXXSRC:%=%-d.o)
+OBJSD := $(CXXSRC:%=%-g.o)
 
 #Project options
 
@@ -46,22 +48,29 @@ CXXINCLUDES := $(INCD)
 
 CXXFLAGS := -Wall -Wextra -Werror -Wpedantic -pedantic-errors -fPIC -std=c++17
 LDFLAGS := -fPIC
-LIBFLAGS := -lboost_thread -lrt -lm -pthread
+LIBFLAGS := -lconfig++ -lboost_thread -lrt -lm -pthread
 
 # Main label
 
-all: dirs $(APPNAME)$(EXE)
+all: dirs $(APPNAME)$(EXE) $(APPNAME)-d$(EXE)
 
 # Project file dependencies
 
-$(OBJD)/ts_main.o $(OBJD)/ts_main-d.o: ts_main.cpp
+DEPD := $(OBJD)/dep
+DEPS := $(CXXSRC:%=$(DEPD)/%.d)
+
+$(DEPD)/%.d: %.cpp | $(DEPD)
+	@$(CXX) -MM -MP -MT $(OBJD)/$(basename $(<F)).o -MT $(OBJD)/$(basename $(<F))-g.o $(CXXFLAGS) $(CXXINCLUDES:%=-I %) $< > $@
+
+$(DEPD):
+	@mkdir -p $@
 
 # Project files build rules
 
 $(OBJD)/%.o: %.cpp
 	$(CXX) $(CXXFLAGS) $(CXXINCLUDES:%=-I %) -DNDEBUG=1 -c $< -o $@
 
-$(OBJD)/%-d.o: %.cpp
+$(OBJD)/%-g.o: %.cpp
 	$(CXX) $(CXXFLAGS) $(CXXINCLUDES:%=-I %) -c $< -o $@
 
 # Project targets build
@@ -71,7 +80,7 @@ $(BIND)/$(APPNAME)$(EXE): $(OBJS)
 	$(CXX) $(LDFLAGS) $^ $(LIBFLAGS) -o $@
 	@echo =**= Done =**=
 
-$(BIND)/$(APPNAME)d$(EXE): $(OBJSD)
+$(BIND)/$(APPNAME)-d$(EXE): $(OBJSD)
 	@echo ==== Building $@ [trusted server] ====
 	$(CXX) $(LDFLAGS) $^ $(LIBFLAGS) -o $@
 	@echo =**= Done =**=
@@ -89,8 +98,12 @@ clean:
 	-@$(RM) $(BIND)/$(APPNAME)d$(EXE)
 	-@$(RM) $(OBJS:%=$(OBJD)/%)
 	-@$(RM) $(OBJSD:%=$(OBJD)/%)
+	-@$(RM) $(DEPS)
 
 cleanall:
-	@$(RM) -r $(DIRS)
+	@$(RM) -rf $(DEPD)
+	@$(RM) -rf $(DIRS)
 
 .PHONY: all dirs clean cleanall
+
+-include $(DEPS)

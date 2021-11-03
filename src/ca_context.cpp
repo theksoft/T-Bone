@@ -1,4 +1,4 @@
-#include "ac_context.hpp"
+#include "ca_context.hpp"
 
 namespace tbone::client {
 
@@ -35,7 +35,7 @@ void TeeContextMap::reset() {
 
 TeeContext* TeeContextMap::match(TEEC_Context *context) {
   std::lock_guard<std::recursive_mutex> lock(_guard);
-  for (auto it = begin(); it != end(); it = begin()) {
+  for (auto it = begin(); it != end(); it++) {
     if (*(*it) == context) {
       return *it;
     }
@@ -46,7 +46,7 @@ TeeContext* TeeContextMap::match(TEEC_Context *context) {
 //==============================================================================
 
 TeeContext::TeeContext(TEEC_Context *context, Tee* tee) :
-  _context(context), _tee(tee) {
+  _context(context), _tee(tee), _remoteID(0) {
   assert(_context);
   assert(_tee);
   TeeContextMap::get().add(this);
@@ -61,12 +61,21 @@ TeeContext::~TeeContext() {
 
 bool TeeContext::connect() {
   assert(_tee);
-  return _tee->connect(reinterpret_cast<Tee::Owner>(_context));
+  _remoteID = _tee->connect(reinterpret_cast<Tee::Owner>(_context));
+  return (0 != _remoteID);
 }
 
 void TeeContext::disconnect() {
   assert(_tee);
   _tee->disconnect(reinterpret_cast<Tee::Owner>(_context));
+}
+
+bool TeeContext::hasSessions() const {
+  return false;
+}
+
+bool TeeContext::hasSharedMemoryBlocks() const {
+  return false;
 }
 
 TeeContext* TeeContext::create(TEEC_Context *context, const char *name) {
