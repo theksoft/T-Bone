@@ -126,7 +126,7 @@ void Tee::disconnect(Owner owner) {
   TBMessageBye bye;
   bye.build((uintptr_t)owner, _name);
   if (_connector->exchange(bye.getMessage(), answer)) {
-    std::string s(answer);
+    std::string s(answer);  // s will be moved
     TBMessageFarewell farewell(s);
     if (farewell.parse()) {
       error = false;

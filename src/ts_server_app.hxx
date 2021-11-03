@@ -33,7 +33,6 @@ class AppHandler : public std::enable_shared_from_this<AppHandler<S>> {
 public:
   AppHandler(S socket)
     : _socket(std::move(socket)),
-//      _remoteName(""), _remoteID(""), _localID(0),
       _rInProgress(false)
   {}
   virtual ~AppHandler() {}
