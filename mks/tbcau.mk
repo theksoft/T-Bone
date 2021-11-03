@@ -3,7 +3,7 @@
 # -----------------------------------------------------------------------------
 
 PLATFORM ?= linux
-APPNAME := tbacu
+APPNAME := tbcau
 LIBAPP := tbapp
 LIBCUW := cuw
 
@@ -42,7 +42,7 @@ vpath %$(EXE) $(BIND)
 # Project files
 
 CSRC := c_cppstream
-CXXSRC := ac_unit_main ac_unit_context
+CXXSRC := ca_unit_main ca_unit_context
 OBJS := $(CXXSRC:%=%.o) $(CSRC:%=%.o) 
 
 #Project options
@@ -61,10 +61,18 @@ all: dirs $(APPNAME)$(EXE)
 
 # Project file dependencies
 
-$(OBJD)/c_cppstream.o: c_cppstream.cpp c_cppstream.hpp
+DEPD := $(OBJD)/dep
+DEPS := $(CXXSRC:%=$(DEPD)/%.d) $(CSRC:%=$(DEPD)/%.d)
 
-$(OBJD)/ac_unit_main.o: ac_unit_main.c ac_unit_tests.h cuw.h
-$(OBJD)/ac_unit_context.o: ac_unit_context.c ac_unit_tests.h cuw.h tb_errors.hpp
+$(DEPD)/%.d: %.cpp | $(DEPD)
+	@$(CXX) -MM -MP -MT $(OBJD)/$(basename $(<F)).o $(CXXFLAGS) $(CXXINCLUDES:%=-I %) $< > $@
+
+$(DEPD)/%.d: %.c | $(DEPD)
+	@$(CC) -MM -MP -MT $(OBJD)/$(basename $(<F)).o $(CFLAGS) $(CINCLUDES:%=-I %) $< > $@
+
+$(DEPD):
+	@mkdir -p $@
+
 $(BIND)/$(APPNAME)$(EXE): libcuw.a lib$(LIBAPP)d.a
 
 # Project files build rules
@@ -81,6 +89,7 @@ $(BIND)/$(APPNAME)$(EXE): $(OBJS)
 	@echo ==== Building $@ [unit test client] ====
 	$(CXX) $(LDFLAGS) $^ $(LIBFLAGS) -o $@
 	cp $(TSTD)/$(APPNAME).cfg $(BIND)/$(APPNAME).cfg
+	cp $(TSTD)/$(APPNAME)s.cfg $(BIND)/$(APPNAME)s.cfg
 	@echo =**= Done =**=
 
 # Other project label
@@ -95,8 +104,12 @@ clean:
 	-@$(RM) $(BIND)/$(APPNAME).cfg
 	-@$(RM) $(BIND)/$(APPNAME)$(EXE)
 	-@$(RM) $(OBJS:%=$(OBJD)/%)
+	-@$(RM) $(DEPS)
 
 cleanall:
-	@$(RM) -r $(DIRS)
+	@$(RM) -rf $(DEPD)
+	@$(RM) -rf $(DIRS)
 
 .PHONY: all dirs clean cleanall
+
+-include $(DEPS)

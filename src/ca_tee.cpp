@@ -1,6 +1,7 @@
-#include "ac_tee.hpp"
-#include "ac_tee_settings.hpp"
+#include "ca_tee.hpp"
+#include "ca_tee_settings.hpp"
 #include "tb_errors.hpp"
+#include "tb_messages.hpp"
 #include <cassert>
 
 namespace tbone::client {
@@ -75,7 +76,7 @@ bool TeeMap::create(const char *filename) {
 
 Tee* TeeMap::match(const char *name) {
   create();
-  std::string teeName = (name) ? name : TEEC_DEFAULT_TEE_NAME;
+  std::string teeName = (name) ? name : TEEC_SETTING_VAL_DEFAULT_TEE_NAME;
   auto it = find(teeName);
   return (end() == it) ? NULL : it->second;
 }
@@ -100,19 +101,41 @@ Tee::~Tee() {
   _name.clear();
 }
 
-bool Tee::connect(Owner owner) {
+uint32_t Tee::connect(Owner owner) {
   assert(_connector);
-  bool connected = false;
+  uint32_t remoteID = 0;
   if (_connector->connect(owner)) {
-    // TODO: Send hello and wait answer
-    connected = true;
+    std::string answer = "";
+    TBMessageHello hello;
+    hello.build((uintptr_t)owner, _name);
+    if (_connector->exchange(hello.getMessage(), answer)) {
+      TBMessageWelcome welcome(answer);
+      if (welcome.parse()) {
+        remoteID = welcome.getClientPairID();
+      }
+    }
   }
-  return connected;
+  return remoteID;
 }
 
 void Tee::disconnect(Owner owner) {
   assert(_connector);
-  // TODO: Send goodbye
+  bool error = true;
+  // Explicit disconnection
+  std::string answer = "";
+  TBMessageBye bye;
+  bye.build((uintptr_t)owner, _name);
+  if (_connector->exchange(bye.getMessage(), answer)) {
+    std::string s(answer);  // s will be moved
+    TBMessageFarewell farewell(s);
+    if (farewell.parse()) {
+      error = false;
+    }
+  }
+  if (error) {
+    const std::string& msg = (answer.length()) ? answer : bye.getMessage();
+    std::cerr << TB_ERROR_DISCONNECTION << msg << std::endl;
+  }
   _connector->disconnect(owner);
 }
 

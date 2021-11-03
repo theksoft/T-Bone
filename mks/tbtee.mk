@@ -33,7 +33,7 @@ vpath %$(EXE) $(BIND)
 
 CSRC := tc_mem
 OBJS := $(CSRC:%=%.o)
-OBJSD := $(CSRC:%=%-d.o)
+OBJSD := $(CSRC:%=%-g.o)
 
 # Compiler and linker options
 
@@ -48,14 +48,21 @@ all: dirs lib$(LIBNAME).a lib$(LIBNAME)d.a
 
 # Project file dependencies
 
-$(OBJD)/tc_mem.o $(OBJD)/tc_mem-d.o: tc_mem.c
+DEPD := $(OBJD)/dep
+DEPS := $(CSRC:%=$(DEPD)/%.d)
+
+$(DEPD)/%.d: %.c | $(DEPD)
+	@$(CC) -MM -MP -MT $(OBJD)/$(basename $(<F)).o -MT $(OBJD)/$(basename $(<F))-g.o $(CFLAGS) $(CINCLUDES:%=-I %) $< > $@
+
+$(DEPD):
+	@mkdir -p $@
 
 # Project files build rules
 
 $(OBJD)/%.o: %.c
 	$(CC) $(CFLAGS) $(CINCLUDES:%=-I %) -DNDEBUG=1 -c $< -o $@
 
-$(OBJD)/%-d.o: %.c
+$(OBJD)/%-g.o: %.c
 	$(CC) $(CFLAGS) $(CINCLUDES:%=-I %) -c $< -o $@
 
 # Project targets build
@@ -83,8 +90,12 @@ clean:
 	-@$(RM) $(LIBD)/lib$(LIBNAME)d.a
 	-@$(RM) $(OBJS:%=$(OBJD)/%)
 	-@$(RM) $(OBJSD:%=$(OBJD)/%)
+	-@$(RM) $(DEPS)
 
 cleanall:
-	@$(RM) -r $(DIRS)
+	@$(RM) -rf $(DEPD)
+	@$(RM) -rf $(DIRS)
 
 .PHONY: all dirs clean cleanall
+
+-include $(DEPS)

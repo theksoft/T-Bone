@@ -1,121 +1,157 @@
+#include "tb_errors.hpp"
+#include "ts_server.hpp"
+#include "ts_settings.hpp"
 #include <iostream>
 
-#include <boost/asio.hpp>
+//==============================================================================
 
-#if 1
+namespace tbone::server {
 
-const int max_length = 1024;
+class Options {
 
-void session(boost::asio::local::stream_protocol::socket sock)
-{
-  try
-  {
-    for (;;)
-    {
-      char data[max_length];
+public:
+  Options(int argc, char* argv[])
+    : _command(""),
+      _error(false),
+      _help(false),
+      _errorMessage(""),
+      _configurationFile(TEES_DEFAULT_CONFIG_FILENAME) {
 
-      boost::system::error_code error;
-      /*size_t length = */sock.read_some(boost::asio::buffer(data), error);
-      if (error == boost::asio::error::eof) {
-        std::cout << "--- connection closed!" << std::endl;
-        break; // Connection closed cleanly by peer.
+    if (argc) { _command = argv[0]; }
+
+    int c;
+    while (!_error && -1 != (c = getopt (argc, argv, "hc:"))) {
+      switch (c) {
+      case 'h': _help = true; break;
+      case 'c':
+        _configurationFile = optarg;
+        if (!strlen(optarg)) {
+          _errorMessage = "ERROR Option 'c' requires a valid argument.";
+          _error = true;
+        }
+        break;
+      case '?':
+        if (optopt == 'c')
+          _errorMessage = "ERROR Option '-" + std::string(1, (char)optopt) + "' requires an argument.";
+        else
+          _errorMessage = "Unknown option '-" + std::string(1, (char)optopt) + "'.";
+        _error = true;
+        break;
+      default:
+        _errorMessage = "Invalid command line!";
+        _error = true;
+        break;
       }
-      else if (error)
-        throw boost::system::system_error(error); // Some other error.
-
-//      boost::asio::write(sock, boost::asio::buffer(data, length));
     }
   }
-  catch (std::exception& e)
-  {
-    std::cerr << "Exception in thread: " << e.what() << "\n";
-  }
-}
 
-void server(boost::asio::io_context& io_context, std::string file)
-{
-  boost::asio::local::stream_protocol::acceptor a(io_context, boost::asio::local::stream_protocol::endpoint(file));
-  for (;;)
-  {
-    std::thread(session, a.accept()).detach();
-    std::cout << "--- connection accepted!" << std::endl;
+  ~Options() {
+    clear();
   }
-}
+
+  void printError() {
+    std::cerr << std::endl << _errorMessage << std::endl;
+  }
+
+  void printUsage() {
+    std::cout << std::endl;
+    std::cout << "Usage: " << _command << " [options]" << std::endl;
+    std::cout << "Options:" << std::endl;
+    std::cout << "  -c <filepath>  <filepath> for configuration file." << std::endl
+              << "                 Default is \"" << TEES_DEFAULT_CONFIG_FILENAME << "\".)" << std::endl;
+    std::cout << "  -h             Display this help and exit." << std::endl;
+    std::cout << std::endl;
+  }
+
+  bool isValid() const                            { return !_error; }
+  bool needHelp() const                           { return _help; }
+  const std::string& getConfigurationFile() const { return _configurationFile; }
+
+private:
+  void clear() {
+    _command.clear();
+    _error = _help = false;
+    _errorMessage.clear();
+    _configurationFile.clear();
+  }
+
+private:
+  std::string _command;
+  bool _error;
+  bool _help;
+  std::string _errorMessage;
+  std::string _configurationFile;
+};
+
+}   // namespace tbone::server
+
+//==============================================================================
 
 int main(int argc, char* argv[])
 {
-  (void)argc; (void)argv;
+  using namespace tbone;
+  using namespace tbone::server;
+
+  Options opt(argc, argv);
+  if (opt.needHelp() || !opt.isValid()) {
+    if (!opt.isValid())
+      opt.printError();
+    opt.printUsage();
+    return 0;
+  }
+
+  ServerSettings settings;
+  if (!settings.readFile(opt.getConfigurationFile())) {
+    return 0;
+  }
+
+  AppLocalServer *als = NULL;
+  AppTcpServer *ats = NULL;
+
   try
   {
-    std::string file = "/tmp/sock-ac-unit";
-    ::unlink(file.c_str());
-    boost::asio::io_context io_context;
-    server(io_context, file);
+    bool oneOfAppServiceSet = false;
+    std::string file = settings.getApplicationLocalFile();
+    if (!file.empty()) {
+      ::unlink(file.c_str());
+      als = new AppLocalServer(
+        TeeIOContext::get()->getIOContext(),
+        LocalEndPoint(file)
+      );
+      oneOfAppServiceSet = true;
+    }
+
+    unsigned short port = settings.getApplicationPort();
+    if (0 != port) {
+      ats = new AppTcpServer(
+        TeeIOContext::get()->getIOContext(),
+        TcpEndPoint(bip::tcp::v4(), port)
+      );
+      oneOfAppServiceSet = true;
+    }
+
+    port = settings.getInpectUrlPort();
+    if (0 != port) {
+      std::cout << "INFO Inspect service not implemented!" << std::endl;
+    }
+
+    if (oneOfAppServiceSet) {
+      TeeIOContext::get()->getIOContext().run();
+    } else {
+      std::cerr << TEES_ERROR_CONFIG_NO_SERVICE << std::endl;
+    }
   }
   catch (std::exception& e)
   {
     std::cerr << "Exception: " << e.what() << "\n";
   }
 
+  if (als) delete als;
+  if (ats) delete ats;
+  std::cout << std::endl << "<<<=== TEE services stopped! ===>>>" << std::endl << std::endl;
   return 0;
 }
 
-#else
+//==============================================================================
 
-using boost::asio::ip::tcp;
-
-const int max_length = 1024;
-
-void session(tcp::socket sock)
-{
-  try
-  {
-    for (;;)
-    {
-      char data[max_length];
-
-      boost::system::error_code error;
-      /*size_t length = */sock.read_some(boost::asio::buffer(data), error);
-      if (error == boost::asio::error::eof) {
-        std::cout << "--- connection closed!" << std::endl;
-        break; // Connection closed cleanly by peer.
-      }
-      else if (error)
-        throw boost::system::system_error(error); // Some other error.
-
-//      boost::asio::write(sock, boost::asio::buffer(data, length));
-    }
-  }
-  catch (std::exception& e)
-  {
-    std::cerr << "Exception in thread: " << e.what() << "\n";
-  }
-}
-
-void server(boost::asio::io_context& io_context, unsigned short port)
-{
-  tcp::acceptor a(io_context, tcp::endpoint(tcp::v4(), port));
-  for (;;)
-  {
-    std::thread(session, a.accept()).detach();
-    std::cout << "--- connection accepted!" << std::endl;
-  }
-}
-
-int main(int argc, char* argv[])
-{
-  (void)argc; (void)argv;
-  try
-  {
-    boost::asio::io_context io_context;
-    server(io_context, 14582);
-  }
-  catch (std::exception& e)
-  {
-    std::cerr << "Exception: " << e.what() << "\n";
-  }
-
-  return 0;
-}
-
-#endif
+// EOF

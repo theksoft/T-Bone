@@ -1,4 +1,4 @@
-#include "ac_tee_connect.hpp"
+#include "ca_tee_connect.hpp"
 #include "tb_errors.hpp"
 #include <cassert>
 
@@ -73,7 +73,7 @@ bool TeeConnector::open() {
     if (LOCAL == _domain) _connection = new TeeLocalConnection(_address);
     else                  _connection = new TeeTcpConnection(_address, _port);
 
-  } catch (bstsys::system_error &e) {
+  } catch (bsys::system_error &e) {
     std::cerr << TEEC_ERROR_CONNECTION << _address;
     if (TCP == _domain) {
       std::cerr <<  ":" << std::dec << _port;
@@ -94,6 +94,12 @@ void TeeConnector::close() {
   _connection = NULL;
 }
 
+bool TeeConnector::exchange(const std::string& greeting, std::string& answer) {
+  if (_connection) {
+    return _connection->exchange(greeting, answer);
+  }
+  return false;
+}
 
 //==============================================================================
 

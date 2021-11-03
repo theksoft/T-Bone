@@ -3,11 +3,11 @@
 // Note: std::set requires key. This implementation has no key.
 //==============================================================================
 
-#ifndef TB_PTR_VECTOR
-#define TB_PTR_VECTOR
+#ifndef TB_PTR_VECTOR_HXX
+#define TB_PTR_VECTOR_HXX
 
+#include "tb_locks.hpp"
 #include <vector>
-#include <mutex>
 
 namespace tbone {
 
@@ -73,27 +73,27 @@ public:
   virtual ~GuardedPtrVector() {}
 
   typename std::vector<T>::iterator find(const T v) {
-    std::lock_guard<std::recursive_mutex> lock(_guard);
+    Locker locker(_guard);
     return PtrVector<T>::find(v);
   }
 
   bool exist(const T v) {
-    std::lock_guard<std::recursive_mutex> lock(_guard);
+    Locker locker(_guard);
     return PtrVector<T>::exist(v);
   }
 
   bool add(T v) {
-    std::lock_guard<std::recursive_mutex> lock(_guard);
+    Locker locker(_guard);
     return PtrVector<T>::add(v);
   }
 
   void remove(T v) {
-    std::lock_guard<std::recursive_mutex> lock(_guard);
+    Locker locker(_guard);
     PtrVector<T>::remove(v);
   }
 
 protected:
-  std::recursive_mutex  _guard;
+  Lock _guard;
 
 };
 
@@ -101,6 +101,6 @@ protected:
 
 } // namespace tbone
 
-#endif// TB_PTR_VECTOR
+#endif// TB_PTR_VECTOR_HXX
 
 // End of file

@@ -53,9 +53,11 @@ extern "C" {
 typedef uint32_t TEEC_Result;
 
 typedef struct {
-  // imp
-  uint32_t magic;
-  void *data;
+  // implementation defined
+  struct {
+    uint32_t magic;
+    void *data;
+  } imp;
 } TEEC_Context;
 
 /* --------------------------------------------------------------------------

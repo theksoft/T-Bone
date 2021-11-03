@@ -3,7 +3,7 @@
 # -----------------------------------------------------------------------------
 # Project targets:
 # + t-bone server application is the TEE manager.
-# + t-bone application library is TEE Rich client API simulation.
+# + t-bone application library is TEE client application API simulation.
 # + t-bone TEE library is the TEE trusted core API simulation.
 # -----------------------------------------------------------------------------
 
@@ -14,7 +14,7 @@ LIBAPP := tbapp
 LIBTEE := tbtee
 
 LIBCUW := cuw
-ACUNIT := tbacu
+CAUNIT := tbcau
 
 ifneq "$(PLATFORM)" "win"
   EXE := 
@@ -46,8 +46,9 @@ all: dirs
 	$(MAKE) -f $(MKSD)/$(LIBAPP).mk
 
 test: all lib$(LIBCUW).a
-	$(MAKE) -f $(MKSD)/$(ACUNIT).mk
-	cp $(BIND)/$(ACUNIT).cfg $(BIND)/tbone-client.cfg
+	$(MAKE) -f $(MKSD)/$(CAUNIT).mk
+	cp $(BIND)/$(CAUNIT).cfg $(BIND)/tbone-client.cfg
+	cp $(BIND)/$(CAUNIT)s.cfg $(BIND)/tbone-server.cfg
 
 $(LIBD)/lib$(LIBCUW).a: ../$(LIBCUW)/Makefile
 	$(MAKE) -C ../$(LIBCUW) cleanall all install PRFX=$(CURDIR)/$(BUILD)
@@ -64,9 +65,9 @@ clean:
 	@$(MAKE) -s -f $(MKSD)/$(SRVTEE).mk clean
 	@$(MAKE) -s -f $(MKSD)/$(LIBTEE).mk clean
 	@$(MAKE) -s -f $(MKSD)/$(LIBAPP).mk clean
-	@$(MAKE) -s -f $(MKSD)/$(ACUNIT).mk clean
+	@$(MAKE) -s -f $(MKSD)/$(CAUNIT).mk clean
 
 cleanall:
-	@$(RM) -r $(BUILD)
+	@$(RM) -rf $(BUILD)
 
 .PHONY: all dirs clean cleanall

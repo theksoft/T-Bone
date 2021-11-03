@@ -11,13 +11,17 @@
 */
 
 #include "tee_client_api.h"
-#include "ac_context.hpp"
-#include "ac_tee.hpp"
+#include "ca_context.hpp"
+#include "ca_tee.hpp"
 #include "tb_errors.hpp"
 #include <cassert>
 #include <iostream>
 
-// Just get a unique 32-bit ID
+/*
+  Create a "unique" 32-bit ID within the application.
+  Use a truncated program address and not atruncated object memory address
+  in order to limit collision.
+*/
 static uint32_t getMagic() {
   return (uint32_t)(uintptr_t)getMagic;
 }
@@ -43,6 +47,7 @@ TEEC_Result TEEC_InitializeContext(const char *name, TEEC_Context *context) {
     return TEEC_ERROR_BAD_PARAMETERS;
   }
 
+  // Programmer error
   if (TeeContextMap::get().match(context)) {
     std::cerr << TEEC_ERROR_CONTEXT_REINIT << " " << std::hex << context << std::endl;
     return TEEC_ERROR_GENERIC;
@@ -67,8 +72,8 @@ TEEC_Result TEEC_InitializeContext(const char *name, TEEC_Context *context) {
   }
 
   // Assign it
-  context->magic = getMagic();
-  context->data = reinterpret_cast<void*>(c);
+  context->imp.magic = getMagic();
+  context->imp.data = reinterpret_cast<void*>(c);
 
   return TEEC_SUCCESS;
 }
@@ -85,7 +90,8 @@ void TEEC_FinalizeContext(TEEC_Context *context) {
     return;
   }
 
-  if (!context->data || getMagic() != context->magic) {
+  // Programmer error
+  if (!context->imp.data || getMagic() != context->imp.magic) {
     std::cerr << TEEC_ERROR_CONTEXT_REMOVE << " " << std::hex << context << std::endl;
     return;
   }
@@ -93,16 +99,26 @@ void TEEC_FinalizeContext(TEEC_Context *context) {
   // Reinterpret imp field
   TeeContext *c = NULL;
   try {
-    c = static_cast<TeeContext*>(context->data);
+    c = static_cast<TeeContext*>(context->imp.data);
     assert(*c == context);
+    if (c->hasSessions()) {
+      // Programmer error
+      std::cerr << TEEC_ERROR_CONTEXT_RM_SESSIONS << " " << std::hex << context << std::endl;
+      return;
+    }
+    if (c->hasSharedMemoryBlocks()) {
+      // Programmer error
+      std::cerr << TEEC_ERROR_CONTEXT_RM_SHM << " " << std::hex << context << std::endl;
+      return;
+    }
     delete c;
   } catch(...) {
     std::cerr << TEEC_ERROR_CONTEXT_REMOVE << " " << std::hex << context << std::endl;
     return;
   }
 
-  context->magic = 0;
-  context->data = NULL;
+  context->imp.magic = 0;
+  context->imp.data = NULL;
 }
 
 // EOF

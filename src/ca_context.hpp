@@ -1,9 +1,9 @@
-#ifndef AC_CONTEXT_HPP
-#define AC_CONTEXT_HPP
+#ifndef CA_CONTEXT_HPP
+#define CA_CONTEXT_HPP
 
 #include "tee_client_api.h"
 #include "tb_ptr_vector.hxx"
-#include "ac_tee.hpp"
+#include "ca_tee.hpp"
 
 namespace tbone::client {
 
@@ -41,11 +41,15 @@ public:
   bool operator==(const TeeContext& other) const;
   inline bool operator!=(const TeeContext& other) const { return !(*this == other); }
 
+  bool hasSessions() const;
+  bool hasSharedMemoryBlocks() const;
+
   static TeeContext* create(TEEC_Context *context, const char *name);
 
 private:
   TEEC_Context* _context;
   Tee*  _tee;
+  uint32_t _remoteID;
 
   friend bool operator== (const TeeContext& lhs, const TEEC_Context* rhs);
 };
@@ -59,6 +63,6 @@ inline bool operator!= (const TEEC_Context* lhs, const TeeContext& rhs) { return
 
 }   // namespace tbone::client
 
-#endif  // AC_CONTEXT_HPP
+#endif  // CA_CONTEXT_HPP
 
 // EOF
